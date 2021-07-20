@@ -124,21 +124,23 @@ export class KVSearch {
 
     match(pattern: string, text: string, matcherType: 'exact' | 'fuzzy' | 'negative'): MapSearchResult | null {
         switch (matcherType) {
-            case 'exact':
+            case 'exact': {
                 if (pattern == text) {
                     return {
                         score: 1,
                     } as MapSearchResult
                 }
                 return null
-            case 'negative':
+            }
+            case 'negative': {
                 if (pattern != text) {
                     return {
                         score: 1,
                     } as MapSearchResult
                 }
                 return null
-            case 'fuzzy':
+            }
+            case 'fuzzy': {
                 const fuzzyResult = match(pattern, text, this.fuzzyConf)
                 if (fuzzyResult === null) {
                     return null
@@ -147,6 +149,7 @@ export class KVSearch {
                     score: fuzzyResult.score,
                     fuzzyResult: fuzzyResult
                 } as MapSearchResult
+            }
         }
     }
 
