@@ -58,7 +58,8 @@ function isQuery(q: Query | QueryNode | 'or' | 'and'): q is Query {
 }
 
 // union will concat 'a' with 'b' and removes the duplicated result
-function union(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[] {
+// Note: this function is exported only for testing purpose.
+export function union(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[] {
     const result = [...a]
     for (let i = 0; i < b.length; i++) {
         let shouldInsert = true
