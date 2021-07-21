@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { FuzzyConfiguration, FuzzyResult, match, score } from '@nexucis/fuzzy';
+import { FuzzyConfiguration, FuzzyResult, match } from '@nexucis/fuzzy';
 
 export interface Query {
     // keyPath is a list of key used to find the nested key in the object to perform query.
@@ -42,6 +42,11 @@ export interface MapSearchResult {
     key: string
     value: string
     fuzzyResult?: FuzzyResult
+}
+
+export interface KVSearchConfiguration {
+    shouldSort?: boolean;
+    fuzzyConfig?: FuzzyConfiguration;
 }
 
 function isQueryNode(q: Query | QueryNode | 'or' | 'and'): q is QueryNode {
@@ -102,10 +107,13 @@ function intersect(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[
 }
 
 export class KVSearch {
-    private readonly fuzzyConf?: FuzzyConfiguration
+    private readonly conf: KVSearchConfiguration
 
-    constructor(fuzzyConf?: FuzzyConfiguration) {
-        this.fuzzyConf = fuzzyConf
+    constructor(conf?: KVSearchConfiguration) {
+        this.conf = {
+            shouldSort: conf?.shouldSort === undefined ? false : conf.shouldSort,
+            fuzzyConfig: conf?.fuzzyConfig
+        }
     }
 
     filterMap(pattern: string, query: Query | QueryNode, list: Record<string, string> | Map<string, string>): MapSearchResult[] {
@@ -141,7 +149,13 @@ export class KVSearch {
                 results.push(intersect(a, b))
             }
         }
-        return results[0]
+        let finalResult = results[0]
+        if (this.conf.shouldSort) {
+            finalResult = finalResult.sort((a, b) => {
+                return b.score - a.score
+            })
+        }
+        return finalResult
     }
 
     match(pattern: string, text: string, matcherType: 'exact' | 'fuzzy' | 'negative'): MapSearchResult | null {
@@ -149,9 +163,9 @@ export class KVSearch {
             case 'exact': {
                 if (pattern == text) {
                     return {
-                        // for scoring here, let's use the same alg than the one used for the fuzzy search.
+                        // for scoring here, let's use the same value than the one used for the fuzzy search.
                         // It will make coherent when you are mixing query with fuzzy and exact match.
-                        score: score([{from: 0, to: pattern.length - 1}], pattern.length),
+                        score: Infinity,
                     } as MapSearchResult
                 }
                 return null
@@ -166,7 +180,7 @@ export class KVSearch {
                 return null
             }
             case 'fuzzy': {
-                const fuzzyResult = match(pattern, text, this.fuzzyConf)
+                const fuzzyResult = match(pattern, text, this.conf.fuzzyConfig)
                 if (fuzzyResult === null) {
                     return null
                 }
