@@ -22,7 +22,7 @@
 
 import 'mocha';
 import { expect } from 'chai';
-import { intersect, union } from './index';
+import { intersect, KVSearch, Query, QueryNode, union } from './index';
 
 describe('union test', () => {
     const testSuite = [
@@ -297,6 +297,124 @@ describe('intersect test', () => {
     for (const test of testSuite) {
         it(test.title, () => {
             expect(intersect(test.a, test.b)).to.deep.equal(test.result)
+        })
+    }
+})
+
+describe('match test', () => {
+    const testSuite = [
+        {
+            title: 'exact match',
+            pattern: 'foo',
+            text: 'foo',
+            matcherType: 'exact' as 'exact' | 'fuzzy' | 'negative',
+            result: {
+                score: Infinity
+            }
+        },
+        {
+            title: 'no exact match',
+            pattern: 'foo',
+            text: 'bar',
+            matcherType: 'exact' as 'exact' | 'fuzzy' | 'negative',
+            result: null
+        },
+        {
+            title: 'negative match',
+            pattern: 'foo',
+            text: 'bar',
+            matcherType: 'negative' as 'exact' | 'fuzzy' | 'negative',
+            result: {
+                score: 1
+            }
+        },
+        {
+            title: 'no negative match',
+            pattern: 'foo',
+            text: 'foo',
+            matcherType: 'negative' as 'exact' | 'fuzzy' | 'negative',
+            result: null
+        },
+        {
+            title: 'fuzzy match',
+            pattern: 'br',
+            text: 'bar',
+            matcherType: 'fuzzy' as 'exact' | 'fuzzy' | 'negative',
+            result: {
+                fuzzyResult: {
+                    original: 'bar',
+                    rendered: 'bar',
+                    score: 1.6666666666666667,
+                },
+                score: 1.6666666666666667,
+            }
+        }
+    ]
+    for (const test of testSuite) {
+        it(test.title, () => {
+            const search = new KVSearch()
+            expect(search.match(test.pattern, test.text, test.matcherType)).to.deep.equal(test.result)
+        })
+    }
+})
+
+describe('filter test', () => {
+    const testSuite = [
+        {
+            title: 'simple key search query with exact match',
+            pattern: 'foo',
+            query: {
+                match: 'exact',
+                keyPath: 'kvsearch_key'
+            } as Query,
+            list: {
+                foo: 'bar',
+                bar: 'foo',
+            },
+            result: [
+                {
+                    key: 'foo',
+                    value: 'bar',
+                    score: Infinity,
+                }
+            ]
+        },
+        {
+            title: 'sophisticate key search query with exact match',
+            pattern: 'foo',
+            query: {
+                operator: 'or',
+                left: {
+                    match: 'exact',
+                    keyPath: 'kvsearch_key'
+                },
+                right: {
+                    match: 'exact',
+                    keyPath: 'kvsearch_value',
+                },
+            } as QueryNode,
+            list: {
+                foo: 'bar',
+                bar: 'foo',
+            },
+            result: [
+                {
+                    key: 'bar',
+                    value: 'foo',
+                    score: Infinity,
+                },
+                {
+                    key: 'foo',
+                    value: 'bar',
+                    score: Infinity,
+                }
+            ]
+        }
+    ]
+    for (const test of testSuite) {
+        it(test.title, () => {
+            const search = new KVSearch()
+            expect(search.filter(test.pattern, test.query, test.list)).to.deep.equal(test.result)
         })
     }
 })
