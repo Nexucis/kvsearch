@@ -87,7 +87,7 @@ export function union(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResu
 // Note: this function is exported only for testing purpose.
 export function intersect(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[] {
     const result: MapSearchResult[] = []
-    let searchList = [...b]
+    const searchList = [...b]
     for (let i = 0; i < a.length; i++) {
         for (let j = 0; j < searchList.length; j++) {
             if (a[i].key !== searchList[j].key) {
