@@ -84,7 +84,8 @@ export function union(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResu
 }
 
 // intersect will keep only the results that are present in 'a' and 'b'
-function intersect(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[] {
+// Note: this function is exported only for testing purpose.
+export function intersect(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[] {
     const result: MapSearchResult[] = []
     let searchList = [...b]
     for (let i = 0; i < a.length; i++) {
@@ -100,7 +101,7 @@ function intersect(a: MapSearchResult[], b: MapSearchResult[]): MapSearchResult[
                 object.fuzzyResult = b[i].fuzzyResult
             }
             result.push(object)
-            searchList = searchList.splice(j, 1)
+            searchList.splice(j, 1)
             break
         }
     }
@@ -211,5 +212,4 @@ export class KVSearch {
         }
         return result
     }
-
 }

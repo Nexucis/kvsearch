@@ -22,7 +22,7 @@
 
 import 'mocha';
 import { expect } from 'chai';
-import { union } from './index';
+import { intersect, union } from './index';
 
 describe('union test', () => {
     const testSuite = [
@@ -47,6 +47,34 @@ describe('union test', () => {
                     value: 'Middle Earth'
                 }
             ],
+            result: [
+                {
+                    score: 1,
+                    key: 'foo',
+                    value: 'bar'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+        },
+        {
+            title: 'b empty returns a',
+            a: [
+                {
+                    score: 1,
+                    key: 'foo',
+                    value: 'bar'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+            b: [],
             result: [
                 {
                     score: 1,
@@ -152,6 +180,123 @@ describe('union test', () => {
     for (const test of testSuite) {
         it(test.title, () => {
             expect(union(test.a, test.b)).to.deep.equal(test.result)
+        })
+    }
+})
+
+describe('intersect test', () => {
+    const testSuite = [
+        {
+            title: 'empty gives empty',
+            a: [],
+            b: [],
+            result: [],
+        },
+        {
+            title: 'a empty returns empty',
+            a: [],
+            b: [
+                {
+                    score: 1,
+                    key: 'foo',
+                    value: 'bar'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+            result: [],
+        },
+        {
+            title: 'b empty returns empty',
+            a: [
+                {
+                    score: 1,
+                    key: 'foo',
+                    value: 'bar'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+            b: [],
+            result: [],
+        },
+        {
+            title: 'no common values',
+            a: [
+                {
+                    score: 1,
+                    key: 'foo',
+                    value: 'bar'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+            b: [
+                {
+                    score: 8,
+                    key: 'john',
+                    value: 'doe'
+                }
+            ],
+            result: []
+        },
+        {
+            title: 'common values',
+            a: [
+                {
+                    score: 8,
+                    key: 'john',
+                    value: 'doe'
+                },
+                {
+                    score: 1,
+                    key: 'foo',
+                    value: 'bar'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+            b: [
+                {
+                    score: 8,
+                    key: 'john',
+                    value: 'doe'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ],
+            result: [
+                {
+                    score: 8,
+                    key: 'john',
+                    value: 'doe'
+                },
+                {
+                    score: 1,
+                    key: 'Country',
+                    value: 'Middle Earth'
+                }
+            ]
+        }
+    ]
+    for (const test of testSuite) {
+        it(test.title, () => {
+            expect(intersect(test.a, test.b)).to.deep.equal(test.result)
         })
     }
 })
