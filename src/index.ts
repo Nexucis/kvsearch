@@ -117,7 +117,7 @@ export class KVSearch {
         }
     }
 
-    filterMap(pattern: string, query: Query | QueryNode, list: Record<string, string> | Map<string, string>): MapSearchResult[] {
+    filter(pattern: string, query: Query | QueryNode, list: Record<string, string> | Map<string, string>): MapSearchResult[] {
         const queryNodes: (Query | QueryNode | 'or' | 'and')[] = [query]
         const results: MapSearchResult[][] = []
         while (queryNodes.length > 0) {
