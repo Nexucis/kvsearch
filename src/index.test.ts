@@ -22,7 +22,7 @@
 
 import 'mocha';
 import { expect } from 'chai';
-import { intersect, KVSearch, Query, QueryNode, union } from './index';
+import { intersect, KVSearch, QueryNode, union } from './index';
 
 describe('union test', () => {
     const testSuite = [
@@ -37,26 +37,34 @@ describe('union test', () => {
             a: [],
             b: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth'
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             result: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth'
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
         },
@@ -64,27 +72,35 @@ describe('union test', () => {
             title: 'b empty returns a',
             a: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth'
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             b: [],
             result: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth'
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
         },
@@ -92,38 +108,50 @@ describe('union test', () => {
             title: 'pure union, no common value',
             a: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             b: [
                 {
+                    original: {
+                        'john': 'doe',
+                    },
                     score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    index: 2,
                 }
             ],
             result: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 },
                 {
+                    original: {
+                        'john': 'doe',
+                    },
                     score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    index: 2,
                 }
             ]
         },
@@ -131,48 +159,158 @@ describe('union test', () => {
             title: 'merging value',
             a: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 4,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             b: [
                 {
+                    original: {
+                        'john': 'doe',
+                    },
                     score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    index: 2,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 5,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 },
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
             ],
             result: [
                 {
-                    score: 4,
-                    key: 'foo',
-                    value: 'bar'
-                },
-                {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 5,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
+                    score: 6,
+                    index: 1,
+                },
+                {
+                    original: {
+                        'john': 'doe',
+                    },
                     score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    index: 2,
+                }
+            ]
+        },
+        {
+            title: 'merging value with matchingInterval',
+            a: [
+                {
+                    original: {
+                        'foo': 'bar',
+                        'k': 'v',
+                    },
+                    score: 4,
+                    index: 0,
+                    matched: [
+                        {
+                            path: ['foo'],
+                            value: 'bar',
+                            intervals: [{ from: 0, to: 2 }]
+                        },
+                    ]
+                },
+                {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
+                    score: 1,
+                    index: 1,
+                }
+            ],
+            b: [
+                {
+                    original: {
+                        'john': 'doe',
+                    },
+                    score: 8,
+                    index: 2,
+                },
+                {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
+                    score: 5,
+                    index: 1,
+                },
+                {
+                    original: {
+                        'foo': 'bar',
+                        'k': 'v',
+                    },
+                    score: 1,
+                    index: 0,
+                    matched: [
+                        {
+                            path: ['k'],
+                            value: 'v',
+                            intervals: [{ from: 0, to: 0 }]
+                        },
+                    ]
+                },
+            ],
+            result: [
+                {
+                    original: {
+                        'foo': 'bar',
+                        'k': 'v'
+                    },
+                    score: 5,
+                    index: 0,
+                    matched: [
+                        {
+                            path: ['k'],
+                            value: 'v',
+                            intervals: [{ from: 0, to: 0 }]
+                        },
+                        {
+                            path: ['foo'],
+                            value: 'bar',
+                            intervals: [{ from: 0, to: 2 }]
+                        },
+                    ]
+                },
+                {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
+                    score: 6,
+                    index: 1,
+                },
+                {
+                    original: {
+                        'john': 'doe',
+                    },
+                    score: 8,
+                    index: 2,
                 }
             ]
         }
@@ -197,14 +335,18 @@ describe('intersect test', () => {
             a: [],
             b: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth'
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             result: [],
@@ -213,14 +355,18 @@ describe('intersect test', () => {
             title: 'b empty returns empty',
             a: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth'
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             b: [],
@@ -230,21 +376,27 @@ describe('intersect test', () => {
             title: 'no common values',
             a: [
                 {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             b: [
                 {
+                    original: {
+                        'john': 'doe',
+                    },
                     score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    index: 2,
                 }
             ],
             result: []
@@ -253,43 +405,57 @@ describe('intersect test', () => {
             title: 'common values',
             a: [
                 {
-                    score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    original: {
+                        'foo': 'bar',
+                    },
+                    score: 4,
+                    index: 0,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
-                    key: 'foo',
-                    value: 'bar'
-                },
-                {
-                    score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    index: 1,
                 }
             ],
             b: [
                 {
+                    original: {
+                        'john': 'doe',
+                    },
                     score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    index: 2,
                 },
                 {
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
+                    score: 5,
+                    index: 1,
+                },
+                {
+                    original: {
+                        'foo': 'bar',
+                    },
                     score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
-                }
+                    index: 0,
+                },
             ],
             result: [
                 {
-                    score: 8,
-                    key: 'john',
-                    value: 'doe'
+                    original: {
+                        'foo': 'bar',
+                    },
+                    score: 5,
+                    index: 0,
                 },
                 {
-                    score: 1,
-                    key: 'Country',
-                    value: 'Middle Earth'
+                    original: {
+                        'Country': 'Middle Earth',
+                    },
+                    score: 6,
+                    index: 1,
                 }
             ]
         }
@@ -304,56 +470,84 @@ describe('intersect test', () => {
 describe('match test', () => {
     const testSuite = [
         {
-            title: 'exact match',
-            pattern: 'foo',
-            text: 'foo',
-            matcherType: 'exact' as 'exact' | 'fuzzy' | 'negative',
-            result: {
-                score: Infinity
-            }
-        },
-        {
-            title: 'no exact match',
-            pattern: 'foo',
-            text: 'bar',
-            matcherType: 'exact' as 'exact' | 'fuzzy' | 'negative',
-            result: null
-        },
-        {
-            title: 'negative match',
-            pattern: 'foo',
-            text: 'bar',
-            matcherType: 'negative' as 'exact' | 'fuzzy' | 'negative',
-            result: {
-                score: 1
-            }
-        },
-        {
-            title: 'no negative match',
-            pattern: 'foo',
-            text: 'foo',
-            matcherType: 'negative' as 'exact' | 'fuzzy' | 'negative',
-            result: null
-        },
-        {
-            title: 'fuzzy match',
-            pattern: 'br',
-            text: 'bar',
-            matcherType: 'fuzzy' as 'exact' | 'fuzzy' | 'negative',
-            result: {
-                fuzzyResult: {
-                    original: 'bar',
-                    rendered: 'bar',
-                    score: 1.6666666666666667,
+            title: 'fuzzy match with matching result',
+            obj: {
+                'discoveredLabels': {
+                    '__address__': 'demo.do.prometheus.io:9093',
+                    '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                    '__metrics_path__': '/metrics',
+                    '__scheme__': 'http',
+                    'env': 'demo',
+                    'job': 'alertmanager'
                 },
-                score: 1.6666666666666667,
+                'labels': {
+                    'env': 'demo',
+                    'instance': 'demo.do.prometheus.io:9093',
+                    'job': 'alertmanager'
+                },
+                'scrapePool': 'alertmanager',
+                'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                'lastError': '',
+                'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                'lastScrapeDuration': 0.005635169,
+                'health': 'up'
+            },
+            query: { keyPath: ['labels', 'job'], match: 'fuzzy' as 'exact' | 'fuzzy' | 'negative', pattern: 'alert' },
+            conf: { includeMatches: true },
+            result: {
+                score: 25,
+                matched: [
+                    {
+                        intervals: [{ from: 0, to: 4 }],
+                        path: ['labels', 'job'],
+                        value: 'alertmanager'
+                    }
+                ]
             }
-        }
+        },
+        {
+            title: 'exact match with matching result',
+            obj: {
+                'discoveredLabels': {
+                    '__address__': 'demo.do.prometheus.io:9093',
+                    '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                    '__metrics_path__': '/metrics',
+                    '__scheme__': 'http',
+                    'env': 'demo',
+                    'job': 'alertmanager'
+                },
+                'labels': {
+                    'env': 'demo',
+                    'instance': 'demo.do.prometheus.io:9093',
+                    'job': 'alertmanager'
+                },
+                'scrapePool': 'alertmanager',
+                'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                'lastError': '',
+                'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                'lastScrapeDuration': 0.005635169,
+                'health': 'up'
+            },
+            query: { keyPath: ['labels'], match: 'exact' as 'exact' | 'fuzzy' | 'negative', pattern: 'instance' },
+            conf: { includeMatches: true },
+            result: {
+                score: Infinity,
+                matched: [
+                    {
+                        intervals: [{ from: 0, to: 7 }],
+                        path: ['labels'],
+                        value: 'instance'
+                    }
+                ]
+            }
+        },
     ]
     for (const test of testSuite) {
         it(test.title, () => {
             const search = new KVSearch()
-            expect(search.match(test.pattern, test.text, test.matcherType)).to.deep.equal(test.result)
+            expect(search.match(test.query, test.obj, test.conf)).to.deep.equal(test.result)
         })
     }
 })
@@ -361,60 +555,310 @@ describe('match test', () => {
 describe('filter test', () => {
     const testSuite = [
         {
-            title: 'simple key search query with exact match',
-            pattern: 'foo',
-            query: {
-                match: 'exact',
-                keyPath: 'kvsearch_key'
-            } as Query,
-            list: {
-                foo: 'bar',
-                bar: 'foo',
-            },
-            result: [
+            title: 'complex query with fuzzy and exact match with matching result',
+            list: [
                 {
-                    key: 'foo',
-                    value: 'bar',
-                    score: Infinity,
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'http://localhost:9100',
+                        '__metrics_path__': '/probe',
+                        '__param_module': 'http_2xx',
+                        '__scheme__': 'http',
+                        'job': 'blackbox'
+                    },
+                    'labels': {
+                        'instance': 'http://localhost:9100',
+                        'job': 'blackbox'
+                    },
+                    'scrapePool': 'blackbox',
+                    'scrapeUrl': 'http://127.0.0.1:9115/probe?module=http_2xx&target=http%3A%2F%2Flocalhost%3A9100',
+                    'globalUrl': 'http://demo.do.prometheus.io:9115/probe?module=http_2xx&target=http%3A%2F%2Flocalhost%3A9100',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:23.286374389Z',
+                    'lastScrapeDuration': 0.003101211,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'localhost:2019',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'caddy'
+                    },
+                    'labels': {
+                        'instance': 'localhost:2019',
+                        'job': 'caddy'
+                    },
+                    'scrapePool': 'caddy',
+                    'scrapeUrl': 'http://localhost:2019/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:2019/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.141536703Z',
+                    'lastScrapeDuration': 0.052116523,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:3000',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'grafana'
+                    },
+                    'labels': {
+                        'instance': 'demo.do.prometheus.io:3000',
+                        'job': 'grafana'
+                    },
+                    'scrapePool': 'grafana',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:3000/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:3000/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.917137204Z',
+                    'lastScrapeDuration': 0.007423624,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9100',
+                        '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'node'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9100',
+                        'job': 'node'
+                    },
+                    'scrapePool': 'node',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9100/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9100/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:13.434412959Z',
+                    'lastScrapeDuration': 0.121943025,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9090',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'prometheus'
+                    },
+                    'labels': {
+                        'instance': 'demo.do.prometheus.io:9090',
+                        'job': 'prometheus'
+                    },
+                    'scrapePool': 'prometheus',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9090/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9090/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:22.157765567Z',
+                    'lastScrapeDuration': 0.01639197,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:8999',
+                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'random'
+                    },
+                    'labels': {
+                        'instance': 'demo.do.prometheus.io:8999',
+                        'job': 'random'
+                    },
+                    'scrapePool': 'random',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:8999/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:8999/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:15.080292611Z',
+                    'lastScrapeDuration': 0.003717954,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:8998',
+                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'random'
+                    },
+                    'labels': {
+                        'instance': 'demo.do.prometheus.io:8998',
+                        'job': 'random'
+                    },
+                    'scrapePool': 'random',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:8998/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:8998/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.863430121Z',
+                    'lastScrapeDuration': 0.003379551,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:8997',
+                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'random'
+                    },
+                    'labels': {
+                        'instance': 'demo.do.prometheus.io:8997',
+                        'job': 'random'
+                    },
+                    'scrapePool': 'random',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:8997/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:8997/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:15.221692269Z',
+                    'lastScrapeDuration': 0.00294093,
+                    'health': 'up'
+                },
+                {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:8996',
+                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'job': 'random'
+                    },
+                    'labels': {
+                        'instance': 'demo.do.prometheus.io:8996',
+                        'job': 'random'
+                    },
+                    'scrapePool': 'random',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:8996/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:8996/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:10.533656426Z',
+                    'lastScrapeDuration': 0.004148609,
+                    'health': 'up'
                 }
-            ]
-        },
-        {
-            title: 'sophisticate key search query with exact match',
-            pattern: 'foo',
+            ],
             query: {
-                operator: 'or',
+                operator: 'and',
                 left: {
-                    match: 'exact',
-                    keyPath: 'kvsearch_key'
+                    match: 'fuzzy',
+                    keyPath: ['discoveredLabels', '__address__'],
+                    pattern: 'demo',
                 },
                 right: {
                     match: 'exact',
-                    keyPath: 'kvsearch_value',
-                },
+                    keyPath: ['labels', 'env'],
+                    pattern: 'demo'
+                }
             } as QueryNode,
-            list: {
-                foo: 'bar',
-                bar: 'foo',
-            },
+            conf: { includeMatches: true },
             result: [
                 {
-                    key: 'bar',
-                    value: 'foo',
+                    index: 0,
+                    original: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9093',
+                            __meta_filepath: '/etc/prometheus/file_sd/alertmanager.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'alertmanager',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9093/metrics',
+                        health: 'up',
+                        labels: {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9093',
+                            'job': 'alertmanager',
+                        },
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                        'lastScrapeDuration': 0.005635169,
+                        'scrapePool': 'alertmanager',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['discoveredLabels', '__address__'],
+                            value: 'demo.do.prometheus.io:9093'
+                        },
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', 'env',],
+                            value: 'demo'
+                        },
+                    ],
                     score: Infinity,
                 },
                 {
-                    key: 'foo',
-                    value: 'bar',
+                    index: 4,
+                    original: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9100',
+                            __meta_filepath: '/etc/prometheus/file_sd/node.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'node',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        health: 'up',
+                        labels: {
+                            env: 'demo',
+                            instance: 'demo.do.prometheus.io:9100',
+                            job: 'node',
+                        },
+                        lastError: '',
+                        lastScrape: '2021-11-29T11:26:13.434412959Z',
+                        lastScrapeDuration: 0.121943025,
+                        scrapePool: 'node',
+                        scrapeUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                    },
+                    matched: [
+                        {
+                            'intervals': [
+                                { from: 0, to: 3 }],
+                            path: ['discoveredLabels', '__address__'],
+                            value: 'demo.do.prometheus.io:9100',
+                        },
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', 'env'],
+                            value: 'demo'
+                        }
+                    ],
                     score: Infinity,
                 }
             ]
-        }
+
+        },
     ]
     for (const test of testSuite) {
         it(test.title, () => {
             const search = new KVSearch()
-            expect(search.filter(test.pattern, test.query, test.list)).to.deep.equal(test.result)
+            expect(search.filter(test.query, test.list, test.conf)).to.deep.equal(test.result)
         })
     }
 })
