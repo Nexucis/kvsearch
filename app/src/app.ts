@@ -2,10 +2,11 @@ import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from '@codemirror/basic-setup';
 import { KVSearchExtension } from '@nexucis/kvsearch-codemirror/dist/kvsearch';
+import { objectList } from '@nexucis/kvsearch-codemirror/dist/test/objectlist';
 
 // TODO A virer quand on passe à un monorepo
 
-const kvSearchExtension = new KVSearchExtension();
+const kvSearchExtension = new KVSearchExtension(objectList);
 
 function createEditor() {
     const doc = '';

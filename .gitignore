@@ -8,3 +8,4 @@ lib
 
 codemirror/src/grammar/parser.terms.js
 codemirror/src/grammar/parser.js
+/**/dist/

@@ -24,24 +24,20 @@ export const kvSearchLanguage: LRLanguage = LRLanguage.define({
 
 export class KVSearchExtension {
     private complete: Complete;
-    private enableCompletion: boolean;
 
-    constructor() {
-        this.complete = new Complete();
-        this.enableCompletion = true;
+    constructor(objects: Record<string, unknown>[]) {
+        this.complete = new Complete(objects);
     }
 
     asExtension(): Extension {
         const language = kvSearchLanguage;
         let extension: Extension = [language];
-        if (this.enableCompletion) {
-            const completion = language.data.of({
-                autocomplete: (context: CompletionContext) => {
-                    return this.complete.kvSearch(context);
-                },
-            });
-            extension = extension.concat(completion);
-        }
+        const completion = language.data.of({
+            autocomplete: (context: CompletionContext) => {
+                return this.complete.kvSearch(context);
+            },
+        });
+        extension = extension.concat(completion);
         return extension;
     }
 }

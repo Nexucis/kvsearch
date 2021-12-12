@@ -2,6 +2,7 @@ import chai from 'chai';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { createEditorState } from '../test/utils.test';
 import { Complete } from './complete';
+import { objectList } from '../test/objectlist';
 
 describe('autocomplete kvsearch test', () => {
     const testCases = [
@@ -26,7 +27,7 @@ describe('autocomplete kvsearch test', () => {
         it(value.title, () => {
             const state = createEditorState(value.expr);
             const context = new CompletionContext(state, value.pos, true);
-            const completion = new Complete();
+            const completion = new Complete(objectList);
             const result = completion.kvSearch(context);
             chai.expect(value.expectedResult).to.deep.equal(result);
         })

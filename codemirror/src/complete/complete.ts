@@ -4,7 +4,6 @@ import { EditorState } from '@codemirror/state';
 import { SyntaxNode } from '@lezer/common';
 import { syntaxTree } from '@codemirror/language';
 import { Identifier, Pattern, Query, QueryPath } from '../grammar/parser.terms';
-import { objectList } from './objectlist';
 import { retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
 
 // ContextKind is the different possible value determinate by the autocompletion
@@ -89,8 +88,13 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
 }
 
 export class Complete {
-    private tree: AutocompleteNode = newRootNode(objectList)
-    private objectList: Record<string, unknown>[] = objectList
+    private readonly tree: AutocompleteNode;
+    private readonly objectList: Record<string, unknown>[];
+
+    constructor(objects: Record<string, unknown>[]) {
+        this.tree = newRootNode(objects)
+        this.objectList = objects
+    }
 
     kvSearch(context: CompletionContext): CompletionResult | null {
         const { state, pos } = context;
