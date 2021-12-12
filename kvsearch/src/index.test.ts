@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import 'mocha';
-import { expect } from 'chai';
+import chai from 'chai';
 import { intersect, KVSearch, QueryNode, union } from './index';
 
 describe('union test', () => {
@@ -317,7 +316,7 @@ describe('union test', () => {
     ];
     for (const test of testSuite) {
         it(test.title, () => {
-            expect(union(test.a, test.b)).to.deep.equal(test.result)
+            chai.expect(union(test.a, test.b)).to.deep.equal(test.result)
         })
     }
 })
@@ -462,7 +461,7 @@ describe('intersect test', () => {
     ]
     for (const test of testSuite) {
         it(test.title, () => {
-            expect(intersect(test.a, test.b)).to.deep.equal(test.result)
+            chai.expect(intersect(test.a, test.b)).to.deep.equal(test.result)
         })
     }
 })
@@ -547,7 +546,7 @@ describe('match test', () => {
     for (const test of testSuite) {
         it(test.title, () => {
             const search = new KVSearch()
-            expect(search.match(test.query, test.obj, test.conf)).to.deep.equal(test.result)
+            chai.expect(search.match(test.query, test.obj, test.conf)).to.deep.equal(test.result)
         })
     }
 })
@@ -858,7 +857,7 @@ describe('filter test', () => {
     for (const test of testSuite) {
         it(test.title, () => {
             const search = new KVSearch()
-            expect(search.filter(test.query, test.list, test.conf)).to.deep.equal(test.result)
+            chai.expect(search.filter(test.query, test.list, test.conf)).to.deep.equal(test.result)
         })
     }
 })

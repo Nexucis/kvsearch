@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 function walkForArray(path: string[], index: number, objs: Array<any>): any | Array<any> | null {
     const result = []
     for (const obj of objs) {
@@ -38,6 +39,7 @@ function walkForArray(path: string[], index: number, objs: Array<any>): any | Ar
     }
 }
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export function walk(path: string[], obj: any, index = 0): any | Array<any> | null {
     let currentObj = obj;
     for (let i = index; i < path.length; i++) {

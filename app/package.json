@@ -1,0 +1,31 @@
+{
+  "name": "@nexucis/kvsearch-app",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Augustin Husson <husson.augustin@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack serve --config webpack.config.ts",
+    "test": "echo 'no test to run'",
+    "build": "webpack --config webpack.config.ts"
+  },
+  "devDependencies": {
+    "fork-ts-checker-webpack-plugin": "^6.5.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.2.6",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.6.0"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^0.19.8",
+    "@codemirror/basic-setup": "^0.19.0",
+    "@codemirror/highlight": "^0.19.6",
+    "@codemirror/language": "^0.19.5",
+    "@codemirror/lint": "^0.19.3",
+    "@codemirror/state": "^0.19.6",
+    "@codemirror/view": "^0.19.20",
+    "@nexucis/kvsearch-codemirror": "^0.1.0"
+  }
+}

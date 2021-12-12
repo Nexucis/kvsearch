@@ -1,0 +1,80 @@
+# Simple Query
+
+labels.instance != localhost
+
+==>
+
+KVSearch(Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),Neq,Pattern)))
+
+# Simple Query with complicated pattern
+
+labels.instance = demo.do.prometheus.io:9100
+
+==>
+
+KVSearch(Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern)))
+
+# Query with two expressions
+
+labels.instance =~ demo AND labels.job != node
+
+==>
+
+KVSearch(
+  Expression(
+    QueryNode(
+      Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlRegex,Pattern)),
+      And,
+      Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),Neq,Pattern))
+    )
+  )
+)
+
+# Query with precedence
+
+labels.instance =~ demo AND ( labels.job = node OR labels.job = grafana )
+
+==>
+
+KVSearch(
+  Expression(
+    QueryNode(
+      Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlRegex,Pattern)),
+      And,
+      Expression(
+        Expression(
+          QueryNode(
+            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern)),
+            Or,
+            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
+          )
+        )
+      )
+    )
+  )
+)
+
+# Query with precedence 2
+
+( labels.instance =~ demo AND labels.job = node ) OR labels.job = grafana
+
+==>
+
+KVSearch(
+  Expression(
+    QueryNode(
+      Expression(
+        Expression(
+          QueryNode(
+            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlRegex,Pattern)),
+            And,
+            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
+          )
+        )
+      ),
+      Or,
+      Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
+    )
+  )
+)
+

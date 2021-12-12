@@ -1,0 +1,39 @@
+{
+  "name": "@nexucis/kvsearch-codemirror",
+  "version": "0.1.0",
+  "description": "",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "npm run build:grammar && tsc",
+    "build:grammar": "lezer-generator src/grammar/kvsearch.grammar -o src/grammar/parser",
+    "test": "ts-mocha -p ../tsconfig.test.json ./**/*.test.ts",
+    "test-coverage": "nyc mocha -r ts-node/register src/**/*.test.ts",
+    "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint --fix src/ --ext .ts"
+  },
+  "author": "Augustin Husson <husson.augustin@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/autocomplete": "^0.19.8",
+    "@codemirror/language": "^0.19.5",
+    "@codemirror/lint": "^0.19.3",
+    "@codemirror/state": "^0.19.6",
+    "@lezer/common": "^0.15.8",
+    "@lezer/generator": "^0.15.2",
+    "ts-mocha": "^8.0.0",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "@nexucis/kvsearch": "^0.1.0"
+  },
+  "peerDependencies": {
+    "@codemirror/autocomplete": "^0.19.8",
+    "@codemirror/language": "^0.19.5",
+    "@codemirror/lint": "^0.19.3",
+    "@codemirror/state": "^0.19.6",
+    "@lezer/common": "^0.15.10"
+  }
+}
