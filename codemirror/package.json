@@ -8,7 +8,7 @@
     "clean": "rimraf dist/",
     "build": "npm run build:grammar && tsc",
     "build:grammar": "lezer-generator src/grammar/kvsearch.grammar -o src/grammar/parser",
-    "test": "ts-mocha -p tsconfig.json ./**/*.test.ts",
+    "test": "ts-mocha -p ../tsconfig.test.json ./**/*.test.ts",
     "test-coverage": "nyc mocha -r ts-node/register src/**/*.test.ts",
     "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "lint": "eslint src/ --ext .ts",
