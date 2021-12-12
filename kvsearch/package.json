@@ -1,0 +1,21 @@
+{
+  "name": "@nexucis/kvsearch",
+  "version": "0.1.0",
+  "description": "",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "tsc",
+    "test": "mocha -r ts-node/register src/**/*.test.ts",
+    "test-coverage": "nyc mocha -r ts-node/register src/**/*.test.ts",
+    "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint --fix src/ --ext .ts"
+  },
+  "author": "Augustin Husson <husson.augustin@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@nexucis/fuzzy": "^0.3.0"
+  }
+}

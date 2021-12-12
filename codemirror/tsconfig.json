@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "../.build-cache/kvsearch-codemirror.tsbuildinfo",
+    "module": "esnext"
+  },
+  "references": [
+    {
+      "path": "../kvsearch",
+      "prepend": false
+    }
+  ],
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
+}

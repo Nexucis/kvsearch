@@ -81,15 +81,20 @@ export function union(a: KVSearchResult[], b: KVSearchResult[], isEqual: ObjectI
     const result = [...a]
     for (let i = 0; i < b.length; i++) {
         let shouldInsert = true
+        const left = b[i];
+        if (left === undefined) {
+            continue
+        }
         for (let j = 0; j < a.length; j++) {
-            if (isEqual(b[i].original, result[j].original)) {
-                result[j] = merge(b[i], result[j])
+            const right = result[j];
+            if (right !== undefined && isEqual(left.original, right.original)) {
+                result[j] = merge(left, right)
                 shouldInsert = false
                 break
             }
         }
         if (shouldInsert) {
-            result.push(b[i])
+            result.push(left)
         }
     }
     return result
@@ -102,10 +107,12 @@ export function intersect(a: KVSearchResult[], b: KVSearchResult[], isEqual: Obj
     const searchList = [...b]
     for (let i = 0; i < a.length; i++) {
         for (let j = 0; j < searchList.length; j++) {
-            if (!isEqual(a[i].original, searchList[j].original)) {
+            const left = a[i];
+            const right = searchList[j];
+            if (left === undefined || right === undefined || !isEqual(left.original, right.original)) {
                 continue
             }
-            result.push(merge(searchList[j], a[i]))
+            result.push(merge(right, left))
             searchList.splice(j, 1)
             break
         }
@@ -194,12 +201,12 @@ export class KVSearch {
             }
         }
         let finalResult = results[0]
-        if (shouldSort) {
+        if (shouldSort && finalResult) {
             finalResult = finalResult.sort((a, b) => {
                 return b.score - a.score
             })
         }
-        return finalResult
+        return finalResult ? finalResult : [];
     }
 
     match(query: Query, obj: Record<string, unknown>, conf?: KVSearchConfiguration): KVSearchResult | null {
@@ -211,16 +218,21 @@ export class KVSearch {
     private executeQuery(query: Query, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
         const result = [];
         for (let i = 0; i < list.length; i++) {
-            const matched = this.match(query, list[i], conf);
+            const el = list[i];
+            if (el === undefined) {
+                continue
+            }
+            const matched = this.match(query, el, conf);
             if (matched !== null) {
                 matched.index = i;
-                matched.original = list[i]
+                matched.original = el;
                 result.push(matched)
             }
         }
         return result;
     }
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     private recursiveMatch(endPath: any, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
         if (endPath === undefined || endPath === null) {
             return null;

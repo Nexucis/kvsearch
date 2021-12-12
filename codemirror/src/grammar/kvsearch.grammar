@@ -1,0 +1,37 @@
+@top KVSearch { Expression }
+
+@precedence { and @left, or @left }
+
+Expression {
+  QueryNode | Query | "(" Expression ")"
+}
+
+QueryNode {
+  Expression !and And Expression |
+  Expression !or Or Expression
+}
+
+Query {
+  QueryPath Neq Pattern |
+  QueryPath EqlRegex Pattern |
+  QueryPath EqlSingle Pattern
+}
+
+QueryPath {
+  Identifier ("." QueryPath)?
+}
+
+@skip { whitespace }
+
+@tokens {
+  whitespace { std.whitespace+ }
+  Identifier { (std.asciiLetter | "_" | ":") (std.asciiLetter | std.digit | "_" | ":" )*}
+  Pattern { (std.asciiLetter | "_" | ":" | ".") (std.asciiLetter | std.digit | "_" | ":" | "." )*}
+
+  // Operator
+  Neq { "!=" }
+  EqlRegex { "=~" }
+  EqlSingle { "=" }
+  And { "AND" }
+  Or { "OR" }
+}

@@ -3,3 +3,8 @@
 node_modules
 
 lib
+
+.build-cache
+
+codemirror/src/grammar/parser.terms.js
+codemirror/src/grammar/parser.js

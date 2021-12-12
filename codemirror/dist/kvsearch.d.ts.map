@@ -1,0 +1,1 @@
+{"version":3,"file":"kvsearch.d.ts","sourceRoot":"","sources":["../src/kvsearch.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,sBAAsB,CAAC;AAGlD,OAAO,EAAE,SAAS,EAAE,MAAM,mBAAmB,CAAC;AAI9C,eAAO,MAAM,gBAAgB,EAAE,UAe7B,CAAA;AAEF,qBAAa,iBAAiB;IAC1B,OAAO,CAAC,QAAQ,CAAW;IAC3B,OAAO,CAAC,gBAAgB,CAAU;;IAOlC,WAAW,IAAI,SAAS;CAa3B"}
