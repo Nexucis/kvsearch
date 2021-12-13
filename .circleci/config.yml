@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@4.9.0
 jobs:
-  build-lib:
+  build-and-test:
     executor:
       name: node/default
       tag: '16.13.1'
@@ -10,6 +10,7 @@ jobs:
       - checkout
       - node/install-packages
       - run: npm run build
+      - run: npm test
   lint-lib:
     executor:
       name: node/default
@@ -23,13 +24,11 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - build-lib:
+      - build-and-test:
           filters:
             tags:
               only: /.*/
       - lint-lib:
-          requires:
-            - build-lib
           filters:
             tags:
               ignore: /.*/
