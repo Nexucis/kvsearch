@@ -1,16 +1,19 @@
 import { AutocompleteNode, iterateAndCreateMissingChild, newRootNode } from './tree';
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { EditorState } from '@codemirror/state';
-import { SyntaxNode } from '@lezer/common';
+import { NodeType, SyntaxNode } from '@lezer/common';
 import { syntaxTree } from '@codemirror/language';
-import { Identifier, Pattern, Query, QueryPath } from '../grammar/parser.terms';
-import { retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
+import { EqlRegex, EqlSingle, Identifier, KVSearch, Neq, Pattern, Query, QueryPath } from '../grammar/parser.terms';
+import { containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
+
+export const matcherTerms = [{ label: '!=' }, { label: '=~' }, { label: '=' }];
 
 // ContextKind is the different possible value determinate by the autocompletion
 export enum ContextKind {
     KeyPath,
     Pattern,
-    QueryOperator,
+    QueryMatcher,
+    QueryOperator
 }
 
 interface TreeTerms {
@@ -35,6 +38,8 @@ function arrayToCompletionResult(data: Completion[], from: number, to: number, s
 function computeStartCompletePosition(node: SyntaxNode, pos: number): number {
     let start = node.from;
     if (node.type.id === QueryPath) {
+        start = pos
+    } else if (node.type.id === KVSearch) {
         start = pos
     }
     return start;
@@ -63,10 +68,56 @@ function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): 
     return { terms: decodedTerms, depth: depth }
 }
 
+function getNodeAtPosition(node: SyntaxNode, pos: number): SyntaxNode | null {
+    const cursor = node.cursor;
+    while (cursor.next()) {
+        if (cursor.from === pos && cursor.to === pos) {
+            return cursor.node;
+        }
+    }
+    return null
+}
+
+function analyzeKVSearchNode(state: EditorState, node: SyntaxNode, pos: number): Context[] {
+    const result: Context[] = [];
+    const nodeAtPosition = getNodeAtPosition(node, pos === 0 ? 0 : pos - 1);
+    if (nodeAtPosition === null) {
+        return result;
+    }
+    const parent = nodeAtPosition.parent
+    if (parent === null) {
+        return result;
+    }
+    switch (parent.type.id) {
+        case KVSearch:
+            // we are likely at the beginning of a new expression so we can safely autocomplete the QueryPath.
+            result.push({ kind: ContextKind.KeyPath, treeTerms: { terms: [], depth: 0 } })
+            break;
+        case Query:
+            if (containsAtLeastOneChild(parent, Neq, EqlRegex, EqlSingle)) {
+                // we likely have this expression:
+                // labels.env !=
+                // So we should autocomplete the QueryPattern
+                // eslint-disable-next-line no-case-declarations
+                const treeTerms = calculateQueryPath(state, nodeAtPosition, pos);
+                result.push({
+                    kind: ContextKind.Pattern,
+                    treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
+                })
+                break
+            } else {
+                result.push({ kind: ContextKind.QueryMatcher, treeTerms: { terms: [], depth: 0 } });
+            }
+    }
+    return result;
+}
 
 export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: number): Context[] {
-    const result: Context[] = [];
+    let result: Context[] = [];
     switch (node.type.id) {
+        case KVSearch:
+            result = result.concat(analyzeKVSearchNode(state, node, pos))
+            break;
         case Pattern:
             // eslint-disable-next-line no-case-declarations
             const treeTerms = calculateQueryPath(state, node, pos);
@@ -100,11 +151,11 @@ export class Complete {
         const { state, pos } = context;
         const tree = syntaxTree(state).resolve(pos, -1);
 
-        /*        syntaxTree(state).iterate({
-                    enter(type: NodeType, from: number, to: number, get: () => SyntaxNode): false | void {
-                        console.log(`${type.name} from ${from} to ${to}`)
-                    }
-                })*/
+        syntaxTree(state).iterate({
+            enter(type: NodeType, from: number, to: number): false | void {
+                console.log(`${type.name} from ${from} to ${to}`)
+            }
+        })
         const contexts = analyzeCompletion(state, tree, pos)
         let result: Completion[] = []
         for (const context of contexts) {
@@ -115,6 +166,8 @@ export class Complete {
                 case ContextKind.Pattern:
                     result = this.autocompleteQueryPattern(result, context)
                     break;
+                case ContextKind.QueryMatcher:
+                    result = result.concat(matcherTerms)
             }
         }
         console.log(`current node: ${tree.name}`)
