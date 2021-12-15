@@ -22,3 +22,4 @@
 
 export { KVSearchExtension, kvSearchLanguage } from './kvsearch';
 export { Complete } from './complete/complete';
+export { translate } from './translate/translate';

@@ -26,8 +26,6 @@ import { basicSetup } from '@codemirror/basic-setup';
 import { KVSearchExtension } from '@nexucis/kvsearch-codemirror';
 import { objectList } from '@nexucis/kvsearch-codemirror/dist/test/objectlist';
 
-// TODO A virer quand on passe à un monorepo
-
 const kvSearchExtension = new KVSearchExtension(objectList);
 
 function createEditor() {

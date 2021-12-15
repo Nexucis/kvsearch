@@ -198,7 +198,7 @@ export class KVSearch {
                 break
             }
             if (isQueryNode(currentQuery)) {
-                // As we are doing a DFS (deep first searching), we inject first the left node, then the right.
+                // As we are doing a DFS (deep first searching, pre-order), we inject first the left node, then the right.
                 // And as we need to merge the result coming from the left and right node according to the current node operator, we add as well the operator.
                 queryNodes.unshift(currentQuery.left, currentQuery.right, currentQuery.operator)
                 continue
