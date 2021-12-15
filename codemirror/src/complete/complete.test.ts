@@ -263,7 +263,7 @@ describe('autocomplete kvsearch test', () => {
             },
         },
         {
-            title: 'autocomplete pattern 2',
+            title: 'autocomplete empty pattern',
             expr: 'labels.instance != ',
             pos: 19,
             expectedResult: {
@@ -316,6 +316,59 @@ describe('autocomplete kvsearch test', () => {
             },
         },
         {
+            title: 'autocomplete empty pattern 2',
+            expr: 'labels.instance !=         ',
+            pos: 27,
+            expectedResult: {
+                options: [
+                    {
+                        label: 'demo.do.prometheus.io:9093',
+                        type: 'text'
+                    },
+                    {
+                        label: 'http://localhost:9100',
+                        type: 'text'
+                    },
+                    {
+                        label: 'localhost:2019',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:3000',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:9100',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:9090',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:8996',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:8999',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:8998',
+                        type: 'text'
+                    },
+                    {
+                        label: 'demo.do.prometheus.io:8997',
+                        type: 'text'
+                    },
+                ],
+
+                from: 27,
+                to: 27,
+                span: /^[a-zA-Z0-9_:]+$/,
+            },
+        },
+        {
             title: 'autocomplete query matcher',
             expr: 'labels.instance ',
             pos: 16,
@@ -325,7 +378,29 @@ describe('autocomplete kvsearch test', () => {
                 to: 16,
                 span: /^[a-zA-Z0-9_:]+$/,
             },
-        }
+        },
+        {
+            title: 'autocomplete query matcher 2',
+            expr: 'labels.instance        ',
+            pos: 23,
+            expectedResult: {
+                options: matcherTerms,
+                from: 23,
+                to: 23,
+                span: /^[a-zA-Z0-9_:]+$/,
+            },
+        },
+        {
+            title: 'autocomplete query matcher 3',
+            expr: '(labels.instance )',
+            pos: 17,
+            expectedResult: {
+                options: matcherTerms,
+                from: 17,
+                to: 17,
+                span: /^[a-zA-Z0-9_:]+$/,
+            },
+        },
     ];
     testCases.forEach((value) => {
         it(value.title, () => {
