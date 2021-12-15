@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { createEditorState } from '../test/utils.test';
-import { Complete, matcherTerms } from './complete';
+import { Complete, matcherTerms, operatorTerms } from './complete';
 import { objectList } from '../test/objectlist';
 
 describe('autocomplete kvsearch test', () => {
@@ -401,6 +401,28 @@ describe('autocomplete kvsearch test', () => {
                 span: /^[a-zA-Z0-9_:]+$/,
             },
         },
+        {
+            title: 'autocomplete query operator',
+            expr: '(labels.instance != test )',
+            pos: 25,
+            expectedResult: {
+                options: operatorTerms,
+                from: 25,
+                to: 25,
+                span: /^[a-zA-Z0-9_:]+$/,
+            }
+        },
+        {
+            title: 'autocomplete query operator 2',
+            expr: '(labels.instance != test OR labels.test = other) ',
+            pos: 49,
+            expectedResult: {
+                options: operatorTerms,
+                from: 49,
+                to: 49,
+                span: /^[a-zA-Z0-9_:]+$/,
+            }
+        }
     ];
     testCases.forEach((value) => {
         it(value.title, () => {
