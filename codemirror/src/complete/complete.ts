@@ -3,14 +3,29 @@ import { Completion, CompletionContext, CompletionResult } from '@codemirror/aut
 import { EditorState } from '@codemirror/state';
 import { SyntaxNode } from '@lezer/common';
 import { syntaxTree } from '@codemirror/language';
-import { Identifier, Pattern, Query, QueryPath } from '../grammar/parser.terms';
-import { retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
+import {
+    EqlRegex,
+    EqlSingle,
+    Expression,
+    Identifier,
+    KVSearch,
+    Neq,
+    Pattern,
+    Query,
+    QueryNode,
+    QueryPath
+} from '../grammar/parser.terms';
+import { containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
+
+export const matcherTerms = [{ label: '!=' }, { label: '=~' }, { label: '=' }];
+export const operatorTerms = [{ label: 'OR' }, { label: 'AND' }]
 
 // ContextKind is the different possible value determinate by the autocompletion
 export enum ContextKind {
     KeyPath,
     Pattern,
-    QueryOperator,
+    QueryMatcher,
+    QueryOperator
 }
 
 interface TreeTerms {
@@ -35,6 +50,8 @@ function arrayToCompletionResult(data: Completion[], from: number, to: number, s
 function computeStartCompletePosition(node: SyntaxNode, pos: number): number {
     let start = node.from;
     if (node.type.id === QueryPath) {
+        start = pos
+    } else if (node.type.id === KVSearch || node.type.id === Expression || node.type.id === QueryNode) {
         start = pos
     }
     return start;
@@ -63,10 +80,70 @@ function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): 
     return { terms: decodedTerms, depth: depth }
 }
 
+function getCloserErrorNodeFromPosition(node: SyntaxNode, pos: number): SyntaxNode | null {
+    const cursor = node.cursor;
+    const candidates = []
+    while (cursor.next()) {
+        // Note: 0 is the id of the error node.
+        if (cursor.from === cursor.to && cursor.node.type.id === 0) {
+            candidates.push(cursor.node)
+        }
+    }
+    // let's loop other the candidates and let's find the closest node from our position.
+    let result: SyntaxNode | null = null
+    for (const candidate of candidates) {
+        if (result === null || candidate.to - pos < result.to - pos) {
+            result = candidate
+        }
+    }
+    return result
+}
+
+function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Context[] {
+    const result: Context[] = [];
+    const errorNode = getCloserErrorNodeFromPosition(node, pos);
+    if (errorNode === null) {
+        // in this case, it means we have a correct expression and so the only thing that can be completed are the query operators
+        result.push({ kind: ContextKind.QueryOperator, treeTerms: { terms: [], depth: 0 } })
+        return result;
+    }
+    const parent = errorNode.parent
+    if (parent === null) {
+        return result;
+    }
+    switch (parent.type.id) {
+        case QueryNode:
+        case Expression:
+        case KVSearch:
+            // we are likely at the beginning of a new expression so we can safely autocomplete the QueryPath.
+            result.push({ kind: ContextKind.KeyPath, treeTerms: { terms: [], depth: 0 } })
+            break;
+        case Query:
+            if (containsAtLeastOneChild(parent, Neq, EqlRegex, EqlSingle)) {
+                // we likely have this expression:
+                // labels.env !=
+                // So we should autocomplete the QueryPattern
+                // eslint-disable-next-line no-case-declarations
+                const treeTerms = calculateQueryPath(state, errorNode, pos);
+                result.push({
+                    kind: ContextKind.Pattern,
+                    treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
+                })
+                break
+            } else {
+                result.push({ kind: ContextKind.QueryMatcher, treeTerms: { terms: [], depth: 0 } });
+            }
+    }
+    return result;
+}
 
 export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: number): Context[] {
-    const result: Context[] = [];
+    let result: Context[] = [];
     switch (node.type.id) {
+        case Expression:
+        case KVSearch:
+            result = result.concat(analyzeRootNode(state, node, pos))
+            break;
         case Pattern:
             // eslint-disable-next-line no-case-declarations
             const treeTerms = calculateQueryPath(state, node, pos);
@@ -99,12 +176,6 @@ export class Complete {
     kvSearch(context: CompletionContext): CompletionResult | null {
         const { state, pos } = context;
         const tree = syntaxTree(state).resolve(pos, -1);
-
-        /*        syntaxTree(state).iterate({
-                    enter(type: NodeType, from: number, to: number, get: () => SyntaxNode): false | void {
-                        console.log(`${type.name} from ${from} to ${to}`)
-                    }
-                })*/
         const contexts = analyzeCompletion(state, tree, pos)
         let result: Completion[] = []
         for (const context of contexts) {
@@ -115,11 +186,14 @@ export class Complete {
                 case ContextKind.Pattern:
                     result = this.autocompleteQueryPattern(result, context)
                     break;
+                case ContextKind.QueryMatcher:
+                    result = result.concat(matcherTerms)
+                    break;
+                case ContextKind.QueryOperator:
+                    result = result.concat(operatorTerms)
+                    break;
             }
         }
-        console.log(`current node: ${tree.name}`)
-        console.log(`current tree: ${syntaxTree(state)}`)
-        console.log(`from ${tree.from} pos ${pos}`)
         return arrayToCompletionResult(result, computeStartCompletePosition(tree, pos), pos)
     }
 
