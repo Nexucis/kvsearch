@@ -25,7 +25,7 @@ export const kvSearchLanguage: LRLanguage = LRLanguage.define({
 export class KVSearchExtension {
     private complete: Complete;
 
-    constructor(objects: Record<string, unknown>[]) {
+    constructor(objects?: Record<string, unknown>[]) {
         this.complete = new Complete(objects);
     }
 

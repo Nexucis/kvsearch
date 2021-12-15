@@ -165,12 +165,14 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
 }
 
 export class Complete {
-    private readonly tree: AutocompleteNode;
-    private readonly objectList: Record<string, unknown>[];
+    private readonly tree?: AutocompleteNode;
+    private readonly objectList?: Record<string, unknown>[];
 
-    constructor(objects: Record<string, unknown>[]) {
-        this.tree = newRootNode(objects)
-        this.objectList = objects
+    constructor(objects?: Record<string, unknown>[]) {
+        if (objects !== undefined) {
+            this.tree = newRootNode(objects)
+            this.objectList = objects
+        }
     }
 
     kvSearch(context: CompletionContext): CompletionResult | null {
@@ -198,6 +200,9 @@ export class Complete {
     }
 
     private autocompleteQueryPath(result: Completion[], context: Context): Completion[] {
+        if (this.objectList === undefined || this.tree === undefined) {
+            return result
+        }
         const node = iterateAndCreateMissingChild(context.treeTerms.depth, context.treeTerms.terms, this.objectList, this.tree)
         if (node !== null) {
             return result.concat(node.keys.map((value) => ({ label: value, type: 'text' })));
@@ -207,6 +212,9 @@ export class Complete {
     }
 
     private autocompleteQueryPattern(result: Completion[], context: Context): Completion[] {
+        if (this.objectList === undefined || this.tree === undefined) {
+            return result
+        }
         const node = iterateAndCreateMissingChild(context.treeTerms.depth, context.treeTerms.terms, this.objectList, this.tree)
         if (node !== null) {
             return result.concat(node.values.map((value) => ({ label: value, type: 'text' })));
