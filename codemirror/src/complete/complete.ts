@@ -1,7 +1,7 @@
 import { AutocompleteNode, iterateAndCreateMissingChild, newRootNode } from './tree';
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { EditorState } from '@codemirror/state';
-import { NodeType, SyntaxNode } from '@lezer/common';
+import { SyntaxNode } from '@lezer/common';
 import { syntaxTree } from '@codemirror/language';
 import {
     EqlRegex,
@@ -12,11 +12,13 @@ import {
     Neq,
     Pattern,
     Query,
+    QueryNode,
     QueryPath
 } from '../grammar/parser.terms';
 import { containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
 
 export const matcherTerms = [{ label: '!=' }, { label: '=~' }, { label: '=' }];
+export const operatorTerms = [{ label: 'OR' }, { label: 'AND' }]
 
 // ContextKind is the different possible value determinate by the autocompletion
 export enum ContextKind {
@@ -49,7 +51,7 @@ function computeStartCompletePosition(node: SyntaxNode, pos: number): number {
     let start = node.from;
     if (node.type.id === QueryPath) {
         start = pos
-    } else if (node.type.id === KVSearch || node.type.id === Expression) {
+    } else if (node.type.id === KVSearch || node.type.id === Expression || node.type.id === QueryNode) {
         start = pos
     }
     return start;
@@ -99,15 +101,18 @@ function getCloserErrorNodeFromPosition(node: SyntaxNode, pos: number): SyntaxNo
 
 function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Context[] {
     const result: Context[] = [];
-    const nodeAtPosition = getCloserErrorNodeFromPosition(node, pos);
-    if (nodeAtPosition === null) {
+    const errorNode = getCloserErrorNodeFromPosition(node, pos);
+    if (errorNode === null) {
+        // in this case, it means we have a correct expression and so the only thing that can be completed are the query operators
+        result.push({ kind: ContextKind.QueryOperator, treeTerms: { terms: [], depth: 0 } })
         return result;
     }
-    const parent = nodeAtPosition.parent
+    const parent = errorNode.parent
     if (parent === null) {
         return result;
     }
     switch (parent.type.id) {
+        case QueryNode:
         case Expression:
         case KVSearch:
             // we are likely at the beginning of a new expression so we can safely autocomplete the QueryPath.
@@ -119,7 +124,7 @@ function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Con
                 // labels.env !=
                 // So we should autocomplete the QueryPattern
                 // eslint-disable-next-line no-case-declarations
-                const treeTerms = calculateQueryPath(state, nodeAtPosition, pos);
+                const treeTerms = calculateQueryPath(state, errorNode, pos);
                 result.push({
                     kind: ContextKind.Pattern,
                     treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
@@ -171,12 +176,6 @@ export class Complete {
     kvSearch(context: CompletionContext): CompletionResult | null {
         const { state, pos } = context;
         const tree = syntaxTree(state).resolve(pos, -1);
-
-        syntaxTree(state).iterate({
-            enter(type: NodeType, from: number, to: number): false | void {
-                console.log(`${type.name} from ${from} to ${to}`)
-            }
-        })
         const contexts = analyzeCompletion(state, tree, pos)
         let result: Completion[] = []
         for (const context of contexts) {
@@ -189,11 +188,12 @@ export class Complete {
                     break;
                 case ContextKind.QueryMatcher:
                     result = result.concat(matcherTerms)
+                    break;
+                case ContextKind.QueryOperator:
+                    result = result.concat(operatorTerms)
+                    break;
             }
         }
-        console.log(`current node: ${tree.name}`)
-        console.log(`current tree: ${syntaxTree(state)}`)
-        console.log(`from ${tree.from} pos ${pos}`)
         return arrayToCompletionResult(result, computeStartCompletePosition(tree, pos), pos)
     }
 
