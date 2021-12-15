@@ -42,12 +42,10 @@ KVSearch(
       Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlRegex,Pattern)),
       And,
       Expression(
-        Expression(
-          QueryNode(
-            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern)),
-            Or,
-            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
-          )
+        QueryNode(
+          Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern)),
+          Or,
+          Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
         )
       )
     )
@@ -64,12 +62,10 @@ KVSearch(
   Expression(
     QueryNode(
       Expression(
-        Expression(
-          QueryNode(
-            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlRegex,Pattern)),
-            And,
-            Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
-          )
+        QueryNode(
+          Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlRegex,Pattern)),
+          And,
+          Expression(Query(QueryPath(Identifier,QueryPath(Identifier)),EqlSingle,Pattern))
         )
       ),
       Or,
@@ -77,4 +73,3 @@ KVSearch(
     )
   )
 )
-
