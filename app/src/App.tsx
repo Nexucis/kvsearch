@@ -17,10 +17,12 @@ function App(): JSX.Element {
     const [list, setList] = useState<Record<string, unknown>[]>(objectList)
     const handleSearchChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         if (e.target.value !== '') {
-            const result = kvSearch.filter(e.target.value, objectList)
+            const result = kvSearch.filter(e.target.value.trim(), objectList)
             setList(result.map((value) => {
                 return value.original
             }))
+        } else {
+            setList(objectList)
         }
     }
 
