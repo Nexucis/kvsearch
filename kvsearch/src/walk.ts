@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-function walkForArray(path: string[], index: number, objs: Array<any>): any | Array<any> | null {
+function walkForArray(path: (string | RegExp)[], index: number, objs: Array<any>): any | Array<any> | null {
     const result = []
     for (const obj of objs) {
         const o = walk(path, obj, index)
@@ -40,7 +40,7 @@ function walkForArray(path: string[], index: number, objs: Array<any>): any | Ar
 }
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export function walk(path: string[], obj: any, index = 0): any | Array<any> | null {
+export function walk(path: (string | RegExp)[], obj: any, index = 0): any | Array<any> | null {
     let currentObj = obj;
     for (let i = index; i < path.length; i++) {
         let shouldMoveToNextKey = false
@@ -51,13 +51,31 @@ export function walk(path: string[], obj: any, index = 0): any | Array<any> | nu
         if (Array.isArray(currentObj)) {
             return walkForArray(path, i, currentObj)
         }
-        for (const key in currentObj) {
-            if (path[i] === key) {
-                shouldMoveToNextKey = true
-                currentObj = currentObj[key]
-                break
+        const matcher = path[i]
+        if (typeof matcher === 'string') {
+            for (const key in currentObj) {
+                if (matcher === key) {
+                    shouldMoveToNextKey = true
+                    currentObj = currentObj[key]
+                    break
+                }
             }
+        } else if (matcher !== undefined) {
+            // matcher is a regexp so we have to test every keys to get all possibilities
+            // Since it's a tree of possibilities, we have to recall walk to retry from the beginning the new key
+            const possibleObj = []
+            for (const key of Object.keys(currentObj)) {
+                if (matcher.test(key)) {
+                    const possibility = walk(path, currentObj[key], i + 1)
+                    if (possibility !== null && possibility !== undefined) {
+                        possibleObj.push(possibility)
+                    }
+                }
+            }
+            return possibleObj;
         }
+
+
         if (!shouldMoveToNextKey) {
             // we didn't find a key in the path used, so we should return null to indicate we didn't find what is searching.
             return null

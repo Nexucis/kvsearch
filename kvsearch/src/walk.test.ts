@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import 'mocha';
 import { expect } from 'chai';
 import { walk } from './walk';
 
@@ -71,6 +70,26 @@ describe('walk test', () => {
             obj: { 'k': { 'k': 'v' }, 'k1': { 'k2': [1, 2, 3] } },
             result: null,
         },
+        {
+            title: 'path with regexp that would return a array of possibilities',
+            path: ['a', /b.*/, 'c'],
+            obj: {
+                'a': {
+                    'b': 'c',
+                    'b1': 'd',
+                    'b2': {
+                        'c': 'd'
+                    },
+                    'bb': {
+                        'c': 'e'
+                    },
+                    'bbc': {
+                        'c': ['k', 'k2']
+                    }
+                }
+            },
+            result: ['d', 'e', ['k', 'k2']]
+        }
     ]
     for (const test of testSuite) {
         it(test.title, () => {

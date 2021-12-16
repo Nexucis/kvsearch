@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import chai from 'chai';
-import { intersect, KVSearch, QueryNode, union } from './index';
+import { intersect, KVSearch, Query, QueryNode, union } from './index';
 
 describe('union test', () => {
     const testSuite = [
@@ -551,213 +551,215 @@ describe('match test', () => {
     }
 })
 
+const objectList = [
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:9093',
+            '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'env': 'demo',
+            'job': 'alertmanager'
+        },
+        'labels': {
+            'env': 'demo',
+            'instance': 'demo.do.prometheus.io:9093',
+            'job': 'alertmanager'
+        },
+        'scrapePool': 'alertmanager',
+        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+        'lastScrapeDuration': 0.005635169,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'http://localhost:9100',
+            '__metrics_path__': '/probe',
+            '__param_module': 'http_2xx',
+            '__scheme__': 'http',
+            'job': 'blackbox'
+        },
+        'labels': {
+            'instance': 'http://localhost:9100',
+            'job': 'blackbox'
+        },
+        'scrapePool': 'blackbox',
+        'scrapeUrl': 'http://127.0.0.1:9115/probe?module=http_2xx&target=http%3A%2F%2Flocalhost%3A9100',
+        'globalUrl': 'http://demo.do.prometheus.io:9115/probe?module=http_2xx&target=http%3A%2F%2Flocalhost%3A9100',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:23.286374389Z',
+        'lastScrapeDuration': 0.003101211,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'localhost:2019',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'caddy'
+        },
+        'labels': {
+            'instance': 'localhost:2019',
+            'job': 'caddy'
+        },
+        'scrapePool': 'caddy',
+        'scrapeUrl': 'http://localhost:2019/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:2019/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:19.141536703Z',
+        'lastScrapeDuration': 0.052116523,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:3000',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'grafana'
+        },
+        'labels': {
+            'instance': 'demo.do.prometheus.io:3000',
+            'job': 'grafana'
+        },
+        'scrapePool': 'grafana',
+        'scrapeUrl': 'http://demo.do.prometheus.io:3000/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:3000/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:19.917137204Z',
+        'lastScrapeDuration': 0.007423624,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:9100',
+            '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'env': 'demo',
+            'job': 'node'
+        },
+        'labels': {
+            'env': 'demo',
+            'instance': 'demo.do.prometheus.io:9100',
+            'job': 'node'
+        },
+        'scrapePool': 'node',
+        'scrapeUrl': 'http://demo.do.prometheus.io:9100/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:9100/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:13.434412959Z',
+        'lastScrapeDuration': 0.121943025,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:9090',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'prometheus'
+        },
+        'labels': {
+            'instance': 'demo.do.prometheus.io:9090',
+            'job': 'prometheus'
+        },
+        'scrapePool': 'prometheus',
+        'scrapeUrl': 'http://demo.do.prometheus.io:9090/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:9090/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:22.157765567Z',
+        'lastScrapeDuration': 0.01639197,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:8999',
+            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'random'
+        },
+        'labels': {
+            'instance': 'demo.do.prometheus.io:8999',
+            'job': 'random'
+        },
+        'scrapePool': 'random',
+        'scrapeUrl': 'http://demo.do.prometheus.io:8999/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:8999/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:15.080292611Z',
+        'lastScrapeDuration': 0.003717954,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:8998',
+            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'random'
+        },
+        'labels': {
+            'instance': 'demo.do.prometheus.io:8998',
+            'job': 'random'
+        },
+        'scrapePool': 'random',
+        'scrapeUrl': 'http://demo.do.prometheus.io:8998/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:8998/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:19.863430121Z',
+        'lastScrapeDuration': 0.003379551,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:8997',
+            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'random'
+        },
+        'labels': {
+            'instance': 'demo.do.prometheus.io:8997',
+            'job': 'random'
+        },
+        'scrapePool': 'random',
+        'scrapeUrl': 'http://demo.do.prometheus.io:8997/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:8997/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:15.221692269Z',
+        'lastScrapeDuration': 0.00294093,
+        'health': 'up'
+    },
+    {
+        'discoveredLabels': {
+            '__address__': 'demo.do.prometheus.io:8996',
+            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+            '__metrics_path__': '/metrics',
+            '__scheme__': 'http',
+            'job': 'random'
+        },
+        'labels': {
+            'instance': 'demo.do.prometheus.io:8996',
+            'job': 'random'
+        },
+        'scrapePool': 'random',
+        'scrapeUrl': 'http://demo.do.prometheus.io:8996/metrics',
+        'globalUrl': 'http://demo.do.prometheus.io:8996/metrics',
+        'lastError': '',
+        'lastScrape': '2021-11-29T11:26:10.533656426Z',
+        'lastScrapeDuration': 0.004148609,
+        'health': 'up'
+    }
+];
+
 describe('filter test', () => {
     const testSuite = [
         {
             title: 'complex query with fuzzy and exact match with matching result',
-            list: [
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:9093',
-                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'env': 'demo',
-                        'job': 'alertmanager'
-                    },
-                    'labels': {
-                        'env': 'demo',
-                        'instance': 'demo.do.prometheus.io:9093',
-                        'job': 'alertmanager'
-                    },
-                    'scrapePool': 'alertmanager',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
-                    'lastScrapeDuration': 0.005635169,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'http://localhost:9100',
-                        '__metrics_path__': '/probe',
-                        '__param_module': 'http_2xx',
-                        '__scheme__': 'http',
-                        'job': 'blackbox'
-                    },
-                    'labels': {
-                        'instance': 'http://localhost:9100',
-                        'job': 'blackbox'
-                    },
-                    'scrapePool': 'blackbox',
-                    'scrapeUrl': 'http://127.0.0.1:9115/probe?module=http_2xx&target=http%3A%2F%2Flocalhost%3A9100',
-                    'globalUrl': 'http://demo.do.prometheus.io:9115/probe?module=http_2xx&target=http%3A%2F%2Flocalhost%3A9100',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:23.286374389Z',
-                    'lastScrapeDuration': 0.003101211,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'localhost:2019',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'caddy'
-                    },
-                    'labels': {
-                        'instance': 'localhost:2019',
-                        'job': 'caddy'
-                    },
-                    'scrapePool': 'caddy',
-                    'scrapeUrl': 'http://localhost:2019/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:2019/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:19.141536703Z',
-                    'lastScrapeDuration': 0.052116523,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:3000',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'grafana'
-                    },
-                    'labels': {
-                        'instance': 'demo.do.prometheus.io:3000',
-                        'job': 'grafana'
-                    },
-                    'scrapePool': 'grafana',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:3000/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:3000/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:19.917137204Z',
-                    'lastScrapeDuration': 0.007423624,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:9100',
-                        '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'env': 'demo',
-                        'job': 'node'
-                    },
-                    'labels': {
-                        'env': 'demo',
-                        'instance': 'demo.do.prometheus.io:9100',
-                        'job': 'node'
-                    },
-                    'scrapePool': 'node',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:9100/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:9100/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:13.434412959Z',
-                    'lastScrapeDuration': 0.121943025,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:9090',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'prometheus'
-                    },
-                    'labels': {
-                        'instance': 'demo.do.prometheus.io:9090',
-                        'job': 'prometheus'
-                    },
-                    'scrapePool': 'prometheus',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:9090/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:9090/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:22.157765567Z',
-                    'lastScrapeDuration': 0.01639197,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:8999',
-                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'random'
-                    },
-                    'labels': {
-                        'instance': 'demo.do.prometheus.io:8999',
-                        'job': 'random'
-                    },
-                    'scrapePool': 'random',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:8999/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:8999/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:15.080292611Z',
-                    'lastScrapeDuration': 0.003717954,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:8998',
-                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'random'
-                    },
-                    'labels': {
-                        'instance': 'demo.do.prometheus.io:8998',
-                        'job': 'random'
-                    },
-                    'scrapePool': 'random',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:8998/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:8998/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:19.863430121Z',
-                    'lastScrapeDuration': 0.003379551,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:8997',
-                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'random'
-                    },
-                    'labels': {
-                        'instance': 'demo.do.prometheus.io:8997',
-                        'job': 'random'
-                    },
-                    'scrapePool': 'random',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:8997/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:8997/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:15.221692269Z',
-                    'lastScrapeDuration': 0.00294093,
-                    'health': 'up'
-                },
-                {
-                    'discoveredLabels': {
-                        '__address__': 'demo.do.prometheus.io:8996',
-                        '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
-                        '__metrics_path__': '/metrics',
-                        '__scheme__': 'http',
-                        'job': 'random'
-                    },
-                    'labels': {
-                        'instance': 'demo.do.prometheus.io:8996',
-                        'job': 'random'
-                    },
-                    'scrapePool': 'random',
-                    'scrapeUrl': 'http://demo.do.prometheus.io:8996/metrics',
-                    'globalUrl': 'http://demo.do.prometheus.io:8996/metrics',
-                    'lastError': '',
-                    'lastScrape': '2021-11-29T11:26:10.533656426Z',
-                    'lastScrapeDuration': 0.004148609,
-                    'health': 'up'
-                }
-            ],
+            list: objectList,
             query: {
                 operator: 'and',
                 left: {
@@ -850,6 +852,279 @@ describe('filter test', () => {
                     ],
                     score: Infinity,
                 }
+            ]
+
+        },
+        {
+            title: 'query with regexp as a path',
+            list: objectList,
+            query: {
+                match: 'fuzzy',
+                pattern: 'demo',
+                keyPath: ['labels', /.*/]
+            } as Query,
+            conf: { includeMatches: true },
+            result: [
+                {
+                    index: 0,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:9093',
+                            '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'env': 'demo',
+                            'job': 'alertmanager'
+                        },
+                        'labels': {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9093',
+                            'job': 'alertmanager'
+                        },
+                        'scrapePool': 'alertmanager',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                        'lastScrapeDuration': 0.005635169,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:9093'
+                        },
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo'
+                        },
+                    ],
+                    score: Infinity,
+                },
+                {
+                    index: 3,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:3000',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'grafana'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:3000',
+                            'job': 'grafana'
+                        },
+                        'scrapePool': 'grafana',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:3000/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:3000/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.917137204Z',
+                        'lastScrapeDuration': 0.007423624,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:3000'
+                        }
+                    ],
+                    score: 16,
+                },
+                {
+                    index: 4,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:9100',
+                            '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'env': 'demo',
+                            'job': 'node'
+                        },
+                        'labels': {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9100',
+                            'job': 'node'
+                        },
+                        'scrapePool': 'node',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9100/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:9100/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:13.434412959Z',
+                        'lastScrapeDuration': 0.121943025,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            'intervals': [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:9100',
+                        },
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo'
+                        }
+                    ],
+                    score: Infinity,
+                },
+                {
+                    index: 5,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:9090',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'prometheus'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:9090',
+                            'job': 'prometheus'
+                        },
+                        'scrapePool': 'prometheus',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9090/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:9090/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:22.157765567Z',
+                        'lastScrapeDuration': 0.01639197,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            'intervals': [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:9090',
+                        },
+                    ],
+                    score: 16,
+                },
+                {
+                    index: 6,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8999',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8999',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8999/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8999/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:15.080292611Z',
+                        'lastScrapeDuration': 0.003717954,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:8999'
+                        }
+                    ],
+                    score: 16,
+                },
+                {
+                    index: 7,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8998',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8998',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8998/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8998/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.863430121Z',
+                        'lastScrapeDuration': 0.003379551,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:8998'
+                        }
+                    ],
+                    score: 16,
+                },
+                {
+                    index: 8,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8997',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8997',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8997/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8997/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:15.221692269Z',
+                        'lastScrapeDuration': 0.00294093,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:8997'
+                        }
+                    ],
+                    score: 16,
+                },
+                {
+                    index: 9,
+                    original: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8996',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8996',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8996/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8996/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:10.533656426Z',
+                        'lastScrapeDuration': 0.004148609,
+                        'health': 'up'
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 3 }],
+                            path: ['labels', /.*/],
+                            value: 'demo.do.prometheus.io:8996'
+                        }
+                    ],
+                    score: 16,
+                },
             ]
 
         },

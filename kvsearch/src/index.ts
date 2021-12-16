@@ -29,7 +29,7 @@ export interface MatchingInterval {
 }
 
 export interface MatchingResult {
-    path: string[];
+    path: (string | RegExp)[];
     value: string;
     intervals: MatchingInterval[];
 }
@@ -42,7 +42,7 @@ export interface KVSearchResult {
 }
 
 export interface Query {
-    keyPath: string[];
+    keyPath: (string | RegExp)[];
     match: 'exact' | 'fuzzy' | 'negative';
     pattern: string;
 }
@@ -223,7 +223,7 @@ export class KVSearch {
             }
         }
         let finalResult = results[0]
-        if (shouldSort && finalResult) {
+        if (shouldSort && finalResult !== undefined) {
             finalResult = finalResult.sort((a, b) => {
                 return b.score - a.score
             })
@@ -299,6 +299,7 @@ export class KVSearch {
 
                     if (includeMatches) {
                         result.matched = [{
+                            // TODO put the accurate path
                             path: query.keyPath,
                             value: text,
                             intervals: [{ from: 0, to: text.length - 1 }]
