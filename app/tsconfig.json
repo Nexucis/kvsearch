@@ -4,7 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "tsBuildInfoFile": "../.build-cache/kvsearch-app.tsbuildinfo",
-    "module": "esnext"
+    "module": "esnext",
+    "jsx": "react-jsx"
   },
   "references": [
     {

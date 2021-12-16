@@ -27,18 +27,18 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 export const commonConfig: Configuration = {
     mode: 'development',
-    entry: path.resolve(__dirname, './src/app.ts'),
+    entry: path.resolve(__dirname, './src/index.tsx'),
     output: {
         path: path.resolve(__dirname, './dist'),
         publicPath: '/',
     },
     resolve: {
-        extensions: ['.ts', '.js', '.json'],
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     },
     plugins: [
         // Generates HTML index page with bundle injected
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, './src/app.html'),
+            template: path.resolve(__dirname, './src/index.html'),
             templateParameters: {},
         }),
         // Does TS type-checking in a separate process
@@ -48,7 +48,7 @@ export const commonConfig: Configuration = {
                 build: true, // Since we use project references...
             },
             eslint: {
-                files: '../*/src/**/*.{ts,js}',
+                files: '../*/src/**/*.{ts,tsx,js,jsx}',
             },
         }),
     ],

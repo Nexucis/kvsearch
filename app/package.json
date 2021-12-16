@@ -12,6 +12,8 @@
     "build": "webpack --config webpack.config.ts"
   },
   "devDependencies": {
+    "@types/react": "^17.0.37",
+    "@types/react-dom": "^17.0.11",
     "fork-ts-checker-webpack-plugin": "^6.5.0",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.2.6",
@@ -27,6 +29,12 @@
     "@codemirror/lint": "^0.19.3",
     "@codemirror/state": "^0.19.6",
     "@codemirror/view": "^0.19.20",
-    "@nexucis/kvsearch-codemirror": "^0.1.0"
+    "@emotion/react": "^11.7.0",
+    "@emotion/styled": "^11.6.0",
+    "@mui/material": "^5.2.3",
+    "@mui/icons-material": "^5.2.4",
+    "@nexucis/kvsearch-codemirror": "^0.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   }
 }
