@@ -24,7 +24,7 @@ import chai from 'chai';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { createEditorState } from '../test/utils.test';
 import { Complete, matcherTerms, operatorTerms } from './complete';
-import { objectList } from '../test/objectlist';
+import { objectList } from '../test/objectlist.test';
 
 describe('autocomplete kvsearch test', () => {
     const testCases = [

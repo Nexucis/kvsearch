@@ -73,6 +73,7 @@ export interface KVSearchConfiguration {
     pre?: string;
     post?: string;
     isEqual?: ObjectIsEqualFn;
+    indexedKeys?: (string | RegExp | (string | RegExp)[])[]
 }
 
 
@@ -104,12 +105,9 @@ export function union(a: KVSearchResult[], b: KVSearchResult[], isEqual: ObjectI
     for (let i = 0; i < b.length; i++) {
         let shouldInsert = true
         const left = b[i];
-        if (left === undefined) {
-            continue
-        }
         for (let j = 0; j < a.length; j++) {
             const right = result[j];
-            if (right !== undefined && isEqual(left.original, right.original)) {
+            if (isEqual(left.original, right.original)) {
                 result[j] = merge(left, right)
                 shouldInsert = false
                 break
@@ -131,7 +129,7 @@ export function intersect(a: KVSearchResult[], b: KVSearchResult[], isEqual: Obj
         for (let j = 0; j < searchList.length; j++) {
             const left = a[i];
             const right = searchList[j];
-            if (left === undefined || right === undefined || !isEqual(left.original, right.original)) {
+            if (!isEqual(left.original, right.original)) {
                 continue
             }
             result.push(merge(right, left))
@@ -162,6 +160,16 @@ function negativeMatch(pattern: string, text: string, caseSensitive: boolean | u
     return localPattern !== localText
 }
 
+function buildQuery(pattern: string, key: string | RegExp | (string | RegExp)[]): Query {
+    const query: Query = { match: 'fuzzy', pattern: pattern, keyPath: [] }
+    if (Array.isArray(key)) {
+        query.keyPath = query.keyPath.concat(key)
+    } else {
+        query.keyPath = [key]
+    }
+    return query
+}
+
 
 export class KVSearch {
     private readonly conf: KVSearchConfiguration;
@@ -175,10 +183,42 @@ export class KVSearch {
             pre: conf?.pre === undefined ? '' : conf.pre,
             post: conf?.post === undefined ? '' : conf.post,
             isEqual: conf?.isEqual === undefined ? defaultIsEqual : conf.isEqual,
+            indexedKeys: conf?.indexedKeys,
         }
     }
 
-    filter(query: Query | QueryNode, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
+    filter(pattern: string, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
+        const indexedKeys = conf?.indexedKeys ? conf.indexedKeys : this.conf.indexedKeys;
+        if (indexedKeys === undefined) {
+            return []
+        }
+        // build the query according to the pattern and the indexedKeys.
+        const indexedKeysLength = indexedKeys.length;
+        const firstQuery = buildQuery(pattern, indexedKeys[0]);
+        if (indexedKeysLength === 1) {
+            return this.filterWithQuery(firstQuery, list, conf)
+        }
+        const firstElement: QueryNode = {
+            operator: 'or',
+            left: firstQuery,
+            right: firstQuery
+        }
+        let lastElement = firstElement;
+        for (let i = 1; i < indexedKeysLength; i++) {
+            const query = buildQuery(pattern, indexedKeys[i]);
+            if (i + 1 < indexedKeysLength) {
+                // here we have to create a new QueryNode
+                const node: QueryNode = { operator: 'or', left: query, right: query }
+                lastElement.right = node;
+                lastElement = node;
+            } else {
+                lastElement.right = query
+            }
+        }
+        return this.filterWithQuery(firstElement, list, conf)
+    }
+
+    filterWithQuery(query: Query | QueryNode, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
         const isEqual = conf?.isEqual !== undefined ? conf.isEqual : this.conf.isEqual;
         const queryNodes: (Query | QueryNode | 'or' | 'and')[] = [query]
@@ -223,7 +263,7 @@ export class KVSearch {
             }
         }
         let finalResult = results[0]
-        if (shouldSort && finalResult !== undefined) {
+        if (shouldSort) {
             finalResult = finalResult.sort((a, b) => {
                 return b.score - a.score
             })
@@ -241,9 +281,6 @@ export class KVSearch {
         const result = [];
         for (let i = 0; i < list.length; i++) {
             const el = list[i];
-            if (el === undefined) {
-                continue
-            }
             const matched = this.match(query, el, conf);
             if (matched !== null) {
                 matched.index = i;

@@ -1132,7 +1132,7 @@ describe('filter test', () => {
     for (const test of testSuite) {
         it(test.title, () => {
             const search = new KVSearch()
-            chai.expect(search.filter(test.query, test.list, test.conf)).to.deep.equal(test.result)
+            chai.expect(search.filterWithQuery(test.query, test.list, test.conf)).to.deep.equal(test.result)
         })
     }
 })
