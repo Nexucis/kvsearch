@@ -1,8 +1,21 @@
-import { Box, Divider, InputAdornment, List, ListItem, TextField } from '@mui/material';
+import {
+    Box,
+    Chip,
+    InputAdornment,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography
+} from '@mui/material';
 import { Search } from '@mui/icons-material';
-import { objectList } from './objectlist';
-import { KVSearch } from '@nexucis/kvsearch';
+import { groupTargets, objectList, Target } from './objectlist';
 import { ChangeEvent, useState } from 'react';
+import { KVSearch } from '@nexucis/kvsearch';
 
 const kvSearch = new KVSearch({
     shouldSort: true,
@@ -14,15 +27,16 @@ const kvSearch = new KVSearch({
 })
 
 function App(): JSX.Element {
-    const [list, setList] = useState<Record<string, unknown>[]>(objectList)
+    const initialPoolList = groupTargets(objectList)
+    const [list, setList] = useState<Record<string, Target[]>>(initialPoolList)
     const handleSearchChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         if (e.target.value !== '') {
             const result = kvSearch.filter(e.target.value.trim(), objectList)
-            setList(result.map((value) => {
-                return value.original
-            }))
+            setList(groupTargets(result.map((value) => {
+                return value.original as unknown as Target
+            })));
         } else {
-            setList(objectList)
+            setList(initialPoolList)
         }
     }
 
@@ -31,21 +45,50 @@ function App(): JSX.Element {
             onChange={handleSearchChange}
             InputProps={{ startAdornment: <InputAdornment position={'start'}><Search/></InputAdornment> }}
         />
-        <List>
-            {
-                list.map((value, index) => {
-                    return (
-                        <>
-                            <ListItem key={index}>
-                                {JSON.stringify(value, null, 2)}
-                            </ListItem>
-                            <Divider/>
-                        </>
-                    )
-                })
-            }
-        </List>
-
+        {
+            Object.entries(list).map(([scrapePool, targets], index) => {
+                return <Box key={index}>
+                    <Typography variant="h6">
+                        {scrapePool}
+                    </Typography>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Endpoint</TableCell>
+                                    <TableCell align={'right'}>State</TableCell>
+                                    <TableCell align={'right'}>Labels</TableCell>
+                                    <TableCell align={'right'}>Last Scrape</TableCell>
+                                    <TableCell align={'right'}>Scrape Duration</TableCell>
+                                    <TableCell align={'right'}>Error</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {
+                                    targets.map((target, targetIndex) => {
+                                        return <TableRow
+                                            key={`${index}/${targetIndex}`}
+                                        >
+                                            <TableCell>{target.scrapeUrl}</TableCell>
+                                            <TableCell align={'right'}>{target.health}</TableCell>
+                                            <TableCell align={'right'}>{
+                                                Object.entries(target.labels).map(([labelKey, labelValue], labelIndex) => {
+                                                    return <Chip key={`${index}/${targetIndex}/${labelIndex}`}
+                                                                 label={`${labelKey}=${labelValue}`}/>
+                                                })
+                                            }</TableCell>
+                                            <TableCell align={'right'}>{target.lastScrape}</TableCell>
+                                            <TableCell align={'right'}>{target.lastScrapeDuration}</TableCell>
+                                            <TableCell align={'right'}>{target.lastError}</TableCell>
+                                        </TableRow>
+                                    })
+                                }
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
+            })
+        }
     </Box>
 }
 
