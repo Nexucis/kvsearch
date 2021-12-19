@@ -30,25 +30,25 @@ describe('walk test', () => {
             title: 'simple, k/v object',
             path: ['k'],
             obj: { 'k': 'v' },
-            result: 'v'
+            result: { path: ['k'], value: 'v' }
         },
         {
             title: 'deep, k/v object',
             path: ['k', 'k', 'k', 'k'],
             obj: { 'k': { 'k': { 'k': { 'k': 'v' } } } },
-            result: 'v'
+            result: { path: ['k', 'k', 'k', 'k'], value: 'v' }
         },
         {
             title: 'deep, k/v object2',
             path: ['k', 'k', 'k'],
             obj: { 'k': { 'k': { 'k': { 'k': 'v' } } } },
-            result: { 'k': 'v' }
+            result: { path: ['k', 'k', 'k'], value: { 'k': 'v' } },
         },
         {
             title: 'nested array of object',
             path: ['k', 'k3', 'k4'],
             obj: { 'k': [{ 'k1': 'v1' }, { 'k2': 'v2' }, { 'k3': [{ 'k4': 'v4' }] }] },
-            result: 'v4'
+            result: { path: ['k', 'k3', 'k4'], value: 'v4' }
         },
         {
             title: 'nested array of object where it returns multiple possibilities',
@@ -62,7 +62,11 @@ describe('walk test', () => {
                     ]
                 }]
             },
-            result: ['v4', ['a', 'b', 'c'], 'v5']
+            result: [
+                { path: ['k', 'k3', 'k4'], value: 'v4' },
+                { path: ['k', 'k3', 'k4'], value: ['a', 'b', 'c'] },
+                { path: ['k', 'k3', 'k4'], value: 'v5' }
+            ]
         },
         {
             title: 'wrong path, null expected',
@@ -88,7 +92,11 @@ describe('walk test', () => {
                     }
                 }
             },
-            result: ['d', 'e', ['k', 'k2']]
+            result: [
+                { path: ['a', 'b2', 'c'], value: 'd' },
+                { path: ['a', 'bb', 'c'], value: 'e' },
+                { path: ['a', 'bbc', 'c'], value: ['k', 'k2'] }
+            ]
         }
     ]
     for (const test of testSuite) {

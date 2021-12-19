@@ -20,66 +20,71 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+export interface WalkingPath {
+    value: Record<string, unknown> | Record<string, unknown> [] | string;
+    path: string[];
+}
+
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-function walkForArray(path: (string | RegExp)[], index: number, objs: Array<any>): any | Array<any> | null {
-    const result = []
+function walkForArray(path: (string | RegExp)[], objs: Record<string, unknown>[], index: number, pathUsed: string[]): WalkingPath | WalkingPath[] | null {
+    let result: WalkingPath[] = []
     for (const obj of objs) {
-        const o = walk(path, obj, index)
-        if (o !== null && o !== undefined) {
-            result.push(o)
+        const o = walk(path, obj, index, pathUsed.concat([]))
+        if (o !== null) {
+            if (Array.isArray(o)) {
+                result = result.concat(o)
+            } else {
+                result.push(o)
+            }
         }
     }
-    if (result.length === 1) {
-        // it would avoid the annoying array of array of array just for one result
-        return result[0]
-    } else if (result.length === 0) {
+    if (result.length === 0) {
         return null
+    } else if (result.length === 1) {
+        return result[0];
     } else {
         return result
     }
 }
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export function walk(path: (string | RegExp)[], obj: any, index = 0): any | Array<any> | null {
-    let currentObj = obj;
+export function walk(path: (string | RegExp)[], obj: Record<string, unknown>, index = 0, pathUsed: string[] = []): WalkingPath | WalkingPath[] | null {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    let currentObj: any = obj;
     for (let i = index; i < path.length; i++) {
-        let shouldMoveToNextKey = false
         if (currentObj === null || currentObj === undefined || typeof currentObj !== 'object') {
             // in that case we cannot continue to walk through the object, since the current object is not an object or is null/undefined
             return null
         }
         if (Array.isArray(currentObj)) {
-            return walkForArray(path, i, currentObj)
+            return walkForArray(path, currentObj, i, pathUsed)
         }
         const matcher = path[i]
         if (typeof matcher === 'string') {
-            for (const key in currentObj) {
-                if (matcher === key) {
-                    shouldMoveToNextKey = true
-                    currentObj = currentObj[key]
-                    break
-                }
+            if (currentObj[matcher] !== undefined) {
+                pathUsed.push(matcher)
+                currentObj = currentObj[matcher]
+            } else {
+                return null
             }
-        } else if (matcher !== undefined) {
+        } else {
             // matcher is a regexp so we have to test every keys to get all possibilities
             // Since it's a tree of possibilities, we have to recall walk to retry from the beginning the new key
-            const possibleObj = []
+            let possibleObj: WalkingPath[] = []
             for (const key of Object.keys(currentObj)) {
                 if (matcher.test(key)) {
-                    const possibility = walk(path, currentObj[key], i + 1)
-                    if (possibility !== null && possibility !== undefined) {
-                        possibleObj.push(possibility)
+                    // we create another array using a concat with an empty array in order to give a different reference
+                    const possibility = walk(path, currentObj[key], i + 1, pathUsed.concat([key]))
+                    if (possibility !== null) {
+                        if (Array.isArray(possibility)) {
+                            possibleObj = possibleObj.concat(possibility)
+                        } else {
+                            possibleObj.push(possibility)
+                        }
                     }
                 }
             }
             return possibleObj;
         }
-
-
-        if (!shouldMoveToNextKey) {
-            // we didn't find a key in the path used, so we should return null to indicate we didn't find what is searching.
-            return null
-        }
     }
-    return currentObj
+    return { path: pathUsed, value: currentObj }
 }

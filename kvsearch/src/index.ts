@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { walk } from './walk';
+import { walk, WalkingPath } from './walk';
 import { match } from '@nexucis/fuzzy';
 
 export interface MatchingInterval {
@@ -274,7 +274,7 @@ export class KVSearch {
     match(query: Query, obj: Record<string, unknown>, conf?: KVSearchConfiguration): KVSearchResult | null {
         // walking through the object until finding the final key used to perform the query
         const endPath = walk(query.keyPath, obj)
-        return this.recursiveMatch(endPath, query, conf)
+        return this.processWalkingPath(endPath, query, conf)
     }
 
     private executeQuery(query: Query, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
@@ -291,30 +291,48 @@ export class KVSearch {
         return result;
     }
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    private recursiveMatch(endPath: any, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
-        if (endPath === undefined || endPath === null) {
-            return null;
-        }
+    private processWalkingPath(walkingPath: WalkingPath | WalkingPath[] | null, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
         let result = null
-        if (typeof endPath === 'string') {
-            result = this.matchSingleString(endPath, query, conf)
-        } else if (Array.isArray(endPath)) {
-            for (const t of endPath) {
-                const tmp = this.recursiveMatch(t, query, conf)
+        if (walkingPath === null) {
+            return null
+        }
+        if (Array.isArray(walkingPath)) {
+            for (const existingPath of walkingPath) {
+                const tmp = this.recursiveMatch(existingPath.value, existingPath.path, query, conf)
                 if (tmp !== null) {
-                    if (result !== null) {
+                    if (result != null) {
                         result = merge(tmp, result)
                     } else {
-                        result = tmp;
+                        result = tmp
                     }
                 }
             }
-        } else if (typeof endPath === 'object') {
-            for (const key of Object.keys(endPath)) {
-                result = this.matchSingleString(key, query, conf)
+        } else {
+            result = this.recursiveMatch(walkingPath.value, walkingPath.path, query, conf)
+        }
+        return result
+    }
+
+    private recursiveMatch(value: Record<string, unknown> | Record<string, unknown>[] | string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
+        let result = null
+        if (typeof value === 'string') {
+            result = this.matchSingleString(value, path, query, conf)
+        } else if (Array.isArray(value)) {
+            for (const r of value) {
+                const tmp = this.recursiveMatch(r, path, query, conf)
+                if (tmp !== null) {
+                    if (result != null) {
+                        result = merge(tmp, result)
+                    } else {
+                        result = tmp
+                    }
+                }
+            }
+        } else {
+            for (const key of Object.keys(value)) {
+                result = this.matchSingleString(key, path, query, conf)
                 if (result !== null) {
-                    // stop to search through the different keys at the first match.
+                    // TODO by configuration decide if we should continue furthermore to grab all result.
                     break
                 }
             }
@@ -322,7 +340,7 @@ export class KVSearch {
         return result
     }
 
-    private matchSingleString(text: string, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
+    private matchSingleString(text: string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const caseSensitive = conf?.caseSensitive !== undefined ? conf.caseSensitive : this.conf.caseSensitive
         switch (query.match) {
@@ -336,8 +354,7 @@ export class KVSearch {
 
                     if (includeMatches) {
                         result.matched = [{
-                            // TODO put the accurate path
-                            path: query.keyPath,
+                            path: path,
                             value: text,
                             intervals: [{ from: 0, to: text.length - 1 }]
                         }]
@@ -371,7 +388,7 @@ export class KVSearch {
                 if (includeMatches) {
                     result.matched = [
                         {
-                            path: query.keyPath,
+                            path: path,
                             value: text,
                             intervals: fuzzyResult.intervals ? fuzzyResult.intervals : [],
                         }

@@ -892,12 +892,12 @@ describe('filter test', () => {
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9093'
                         },
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'env'],
                             value: 'demo'
                         },
                     ],
@@ -927,7 +927,7 @@ describe('filter test', () => {
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:3000'
                         }
                     ],
@@ -960,12 +960,12 @@ describe('filter test', () => {
                     matched: [
                         {
                             'intervals': [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9100',
                         },
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'env'],
                             value: 'demo'
                         }
                     ],
@@ -995,7 +995,7 @@ describe('filter test', () => {
                     matched: [
                         {
                             'intervals': [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9090',
                         },
                     ],
@@ -1026,7 +1026,7 @@ describe('filter test', () => {
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8999'
                         }
                     ],
@@ -1057,7 +1057,7 @@ describe('filter test', () => {
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8998'
                         }
                     ],
@@ -1088,7 +1088,7 @@ describe('filter test', () => {
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8997'
                         }
                     ],
@@ -1119,7 +1119,7 @@ describe('filter test', () => {
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8996'
                         }
                     ],
