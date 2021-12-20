@@ -39,11 +39,17 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth'
+                    },
+                    rendered: {
                         'Country': 'Middle Earth'
                     },
                     score: 1,
@@ -55,11 +61,17 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth'
+                    },
+                    rendered: {
                         'Country': 'Middle Earth'
                     },
                     score: 1,
@@ -74,11 +86,17 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth'
+                    },
+                    rendered: {
                         'Country': 'Middle Earth'
                     },
                     score: 1,
@@ -91,11 +109,17 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth'
+                    },
+                    rendered: {
                         'Country': 'Middle Earth'
                     },
                     score: 1,
@@ -110,11 +134,17 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth',
+                    },
+                    rendered: {
                         'Country': 'Middle Earth',
                     },
                     score: 1,
@@ -126,6 +156,9 @@ describe('union test', () => {
                     original: {
                         'john': 'doe',
                     },
+                    rendered: {
+                        'john': 'doe',
+                    },
                     score: 8,
                     index: 2,
                 }
@@ -135,6 +168,9 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
@@ -142,11 +178,17 @@ describe('union test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
                     index: 1,
                 },
                 {
                     original: {
+                        'john': 'doe',
+                    },
+                    rendered: {
                         'john': 'doe',
                     },
                     score: 8,
@@ -161,11 +203,17 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 4,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth',
+                    },
+                    rendered: {
                         'Country': 'Middle Earth',
                     },
                     score: 1,
@@ -177,6 +225,9 @@ describe('union test', () => {
                     original: {
                         'john': 'doe',
                     },
+                    rendered: {
+                        'john': 'doe',
+                    },
                     score: 8,
                     index: 2,
                 },
@@ -184,11 +235,17 @@ describe('union test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 5,
                     index: 1,
                 },
                 {
                     original: {
+                        'foo': 'bar',
+                    },
+                    rendered: {
                         'foo': 'bar',
                     },
                     score: 1,
@@ -200,6 +257,9 @@ describe('union test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 5,
                     index: 0,
                 },
@@ -207,11 +267,17 @@ describe('union test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 6,
                     index: 1,
                 },
                 {
                     original: {
+                        'john': 'doe',
+                    },
+                    rendered: {
                         'john': 'doe',
                     },
                     score: 8,
@@ -224,6 +290,10 @@ describe('union test', () => {
             a: [
                 {
                     original: {
+                        'foo': 'bar',
+                        'k': 'v',
+                    },
+                    rendered: {
                         'foo': 'bar',
                         'k': 'v',
                     },
@@ -241,6 +311,9 @@ describe('union test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 1,
                     index: 1,
                 }
@@ -250,6 +323,9 @@ describe('union test', () => {
                     original: {
                         'john': 'doe',
                     },
+                    rendered: {
+                        'john': 'doe',
+                    },
                     score: 8,
                     index: 2,
                 },
@@ -257,11 +333,18 @@ describe('union test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 5,
                     index: 1,
                 },
                 {
                     original: {
+                        'foo': 'bar',
+                        'k': 'v',
+                    },
+                    rendered: {
                         'foo': 'bar',
                         'k': 'v',
                     },
@@ -279,6 +362,10 @@ describe('union test', () => {
             result: [
                 {
                     original: {
+                        'foo': 'bar',
+                        'k': 'v'
+                    },
+                    rendered: {
                         'foo': 'bar',
                         'k': 'v'
                     },
@@ -301,11 +388,17 @@ describe('union test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 6,
                     index: 1,
                 },
                 {
                     original: {
+                        'john': 'doe',
+                    },
+                    rendered: {
                         'john': 'doe',
                     },
                     score: 8,
@@ -337,11 +430,17 @@ describe('intersect test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth'
+                    },
+                    rendered: {
                         'Country': 'Middle Earth'
                     },
                     score: 1,
@@ -357,11 +456,17 @@ describe('intersect test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth'
+                    },
+                    rendered: {
                         'Country': 'Middle Earth'
                     },
                     score: 1,
@@ -378,11 +483,17 @@ describe('intersect test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 1,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth',
+                    },
+                    rendered: {
                         'Country': 'Middle Earth',
                     },
                     score: 1,
@@ -392,6 +503,9 @@ describe('intersect test', () => {
             b: [
                 {
                     original: {
+                        'john': 'doe',
+                    },
+                    rendered: {
                         'john': 'doe',
                     },
                     score: 8,
@@ -407,11 +521,17 @@ describe('intersect test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 4,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth',
+                    },
+                    rendered: {
                         'Country': 'Middle Earth',
                     },
                     score: 1,
@@ -423,6 +543,9 @@ describe('intersect test', () => {
                     original: {
                         'john': 'doe',
                     },
+                    rendered: {
+                        'john': 'doe',
+                    },
                     score: 8,
                     index: 2,
                 },
@@ -430,11 +553,17 @@ describe('intersect test', () => {
                     original: {
                         'Country': 'Middle Earth',
                     },
+                    rendered: {
+                        'Country': 'Middle Earth',
+                    },
                     score: 5,
                     index: 1,
                 },
                 {
                     original: {
+                        'foo': 'bar',
+                    },
+                    rendered: {
                         'foo': 'bar',
                     },
                     score: 1,
@@ -446,11 +575,17 @@ describe('intersect test', () => {
                     original: {
                         'foo': 'bar',
                     },
+                    rendered: {
+                        'foo': 'bar',
+                    },
                     score: 5,
                     index: 0,
                 },
                 {
                     original: {
+                        'Country': 'Middle Earth',
+                    },
+                    rendered: {
                         'Country': 'Middle Earth',
                     },
                     score: 6,
@@ -496,6 +631,50 @@ describe('match test', () => {
             conf: { includeMatches: true },
             result: {
                 score: 25,
+                original: {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
+                rendered: {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
                 matched: [
                     {
                         intervals: [{ from: 0, to: 4 }],
@@ -533,6 +712,50 @@ describe('match test', () => {
             conf: { includeMatches: true },
             result: {
                 score: Infinity,
+                original: {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
+                rendered: {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
                 matched: [
                     {
                         intervals: [{ from: 0, to: 7 }],
@@ -755,7 +978,7 @@ const objectList = [
     }
 ];
 
-describe('filter test', () => {
+describe('filterWithQuery test', () => {
     const testSuite = [
         {
             title: 'complex query with fuzzy and exact match with matching result',
@@ -799,6 +1022,28 @@ describe('filter test', () => {
                         'scrapePool': 'alertmanager',
                         'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
                     },
+                    rendered: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9093',
+                            __meta_filepath: '/etc/prometheus/file_sd/alertmanager.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'alertmanager',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9093/metrics',
+                        health: 'up',
+                        labels: {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9093',
+                            'job': 'alertmanager',
+                        },
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                        'lastScrapeDuration': 0.005635169,
+                        'scrapePool': 'alertmanager',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
@@ -816,6 +1061,28 @@ describe('filter test', () => {
                 {
                     index: 4,
                     original: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9100',
+                            __meta_filepath: '/etc/prometheus/file_sd/node.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'node',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        health: 'up',
+                        labels: {
+                            env: 'demo',
+                            instance: 'demo.do.prometheus.io:9100',
+                            job: 'node',
+                        },
+                        lastError: '',
+                        lastScrape: '2021-11-29T11:26:13.434412959Z',
+                        lastScrapeDuration: 0.121943025,
+                        scrapePool: 'node',
+                        scrapeUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                    },
+                    rendered: {
                         discoveredLabels: {
                             __address__: 'demo.do.prometheus.io:9100',
                             __meta_filepath: '/etc/prometheus/file_sd/node.yml',
@@ -889,15 +1156,37 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.005635169,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:9093',
+                            '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'env': 'demo',
+                            'job': 'alertmanager'
+                        },
+                        'labels': {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9093',
+                            'job': 'alertmanager'
+                        },
+                        'scrapePool': 'alertmanager',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                        'lastScrapeDuration': 0.005635169,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9093'
                         },
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'env'],
                             value: 'demo'
                         },
                     ],
@@ -924,10 +1213,29 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.007423624,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:3000',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'grafana'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:3000',
+                            'job': 'grafana'
+                        },
+                        'scrapePool': 'grafana',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:3000/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:3000/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.917137204Z',
+                        'lastScrapeDuration': 0.007423624,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:3000'
                         }
                     ],
@@ -957,15 +1265,37 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.121943025,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:9100',
+                            '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'env': 'demo',
+                            'job': 'node'
+                        },
+                        'labels': {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9100',
+                            'job': 'node'
+                        },
+                        'scrapePool': 'node',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9100/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:9100/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:13.434412959Z',
+                        'lastScrapeDuration': 0.121943025,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             'intervals': [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9100',
                         },
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'env'],
                             value: 'demo'
                         }
                     ],
@@ -992,10 +1322,29 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.01639197,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:9090',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'prometheus'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:9090',
+                            'job': 'prometheus'
+                        },
+                        'scrapePool': 'prometheus',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9090/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:9090/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:22.157765567Z',
+                        'lastScrapeDuration': 0.01639197,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             'intervals': [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9090',
                         },
                     ],
@@ -1023,10 +1372,30 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.003717954,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8999',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8999',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8999/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8999/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:15.080292611Z',
+                        'lastScrapeDuration': 0.003717954,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8999'
                         }
                     ],
@@ -1054,10 +1423,30 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.003379551,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8998',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8998',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8998/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8998/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.863430121Z',
+                        'lastScrapeDuration': 0.003379551,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8998'
                         }
                     ],
@@ -1085,10 +1474,30 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.00294093,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8997',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8997',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8997/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8997/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:15.221692269Z',
+                        'lastScrapeDuration': 0.00294093,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8997'
                         }
                     ],
@@ -1116,10 +1525,30 @@ describe('filter test', () => {
                         'lastScrapeDuration': 0.004148609,
                         'health': 'up'
                     },
+                    rendered: {
+                        'discoveredLabels': {
+                            '__address__': 'demo.do.prometheus.io:8996',
+                            '__meta_filepath': '/etc/prometheus/file_sd/random.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'job': 'random'
+                        },
+                        'labels': {
+                            'instance': 'demo.do.prometheus.io:8996',
+                            'job': 'random'
+                        },
+                        'scrapePool': 'random',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:8996/metrics',
+                        'globalUrl': 'http://demo.do.prometheus.io:8996/metrics',
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:10.533656426Z',
+                        'lastScrapeDuration': 0.004148609,
+                        'health': 'up'
+                    },
                     matched: [
                         {
                             intervals: [{ from: 0, to: 3 }],
-                            path: ['labels', /.*/],
+                            path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8996'
                         }
                     ],
@@ -1133,6 +1562,145 @@ describe('filter test', () => {
         it(test.title, () => {
             const search = new KVSearch()
             chai.expect(search.filterWithQuery(test.query, test.list, test.conf)).to.deep.equal(test.result)
+        })
+    }
+})
+
+describe('filter test', () => {
+    const testSuite = [
+        {
+            title: 'search on labels key',
+            list: objectList,
+            pattern: 'env',
+            conf: { includeMatches: true },
+            result: [
+                {
+                    index: 0,
+                    original: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9093',
+                            __meta_filepath: '/etc/prometheus/file_sd/alertmanager.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'alertmanager',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9093/metrics',
+                        health: 'up',
+                        labels: {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9093',
+                            'job': 'alertmanager',
+                        },
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                        'lastScrapeDuration': 0.005635169,
+                        'scrapePool': 'alertmanager',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    },
+                    rendered: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9093',
+                            __meta_filepath: '/etc/prometheus/file_sd/alertmanager.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'alertmanager',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9093/metrics',
+                        health: 'up',
+                        labels: {
+                            '<strong>env</strong>': 'demo',
+                            'instance': 'demo.do.prometheus.io:9093',
+                            'job': 'alertmanager',
+                        },
+                        'lastError': '',
+                        'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                        'lastScrapeDuration': 0.005635169,
+                        'scrapePool': 'alertmanager',
+                        'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 2 }],
+                            path: ['labels'],
+                            value: 'env'
+                        },
+                    ],
+                    score: Infinity,
+                },
+                {
+                    index: 4,
+                    original: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9100',
+                            __meta_filepath: '/etc/prometheus/file_sd/node.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'node',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        health: 'up',
+                        labels: {
+                            env: 'demo',
+                            instance: 'demo.do.prometheus.io:9100',
+                            job: 'node',
+                        },
+                        lastError: '',
+                        lastScrape: '2021-11-29T11:26:13.434412959Z',
+                        lastScrapeDuration: 0.121943025,
+                        scrapePool: 'node',
+                        scrapeUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                    },
+                    rendered: {
+                        discoveredLabels: {
+                            __address__: 'demo.do.prometheus.io:9100',
+                            __meta_filepath: '/etc/prometheus/file_sd/node.yml',
+                            __metrics_path__: '/metrics',
+                            __scheme__: 'http',
+                            env: 'demo',
+                            job: 'node',
+                        },
+                        globalUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        health: 'up',
+                        labels: {
+                            '<strong>env</strong>': 'demo',
+                            instance: 'demo.do.prometheus.io:9100',
+                            job: 'node',
+                        },
+                        lastError: '',
+                        lastScrape: '2021-11-29T11:26:13.434412959Z',
+                        lastScrapeDuration: 0.121943025,
+                        scrapePool: 'node',
+                        scrapeUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                    },
+                    matched: [
+                        {
+                            intervals: [{ from: 0, to: 2 }],
+                            path: ['labels'],
+                            value: 'env'
+                        }
+                    ],
+                    score: Infinity,
+                }
+            ]
+
+        },
+    ]
+    for (const test of testSuite) {
+        it(test.title, () => {
+            const search = new KVSearch({
+                shouldSort: true,
+                pre: '<strong>',
+                post: '</strong>',
+                indexedKeys: [
+                    'labels',
+                    'scrapePool',
+                    ['labels', /.*/]
+                ]
+            })
+            chai.expect(search.filter(test.pattern, test.list, test.conf)).to.deep.equal(test.result)
         })
     }
 })

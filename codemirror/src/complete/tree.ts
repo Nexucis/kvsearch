@@ -102,9 +102,12 @@ function createChild(objects: Record<string, unknown>[], parent: AutocompleteNod
     const values = new Set<string>();
     const indices: number[] = [];
     for (const index of parent.indices) {
-        const obj = walk(newPath, objects[index]);
-        if (addKeys(obj, keys, values)) {
-            indices.push(index)
+        const currentObj = objects[index]
+        if (currentObj !== undefined) {
+            const obj = walk(newPath, currentObj);
+            if (addKeys(obj, keys, values)) {
+                indices.push(index)
+            }
         }
     }
     if (indices.length > 0 || values.size > 0) {
@@ -125,6 +128,7 @@ function createChild(objects: Record<string, unknown>[], parent: AutocompleteNod
 
 // addKeys is adding data in the result depending of the type of object.
 // addKeys returns true if it adds something in the result. It returns false otherwise.
+// TODO need to be deeply reviewed and to use the WalkingPath object
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 function addKeys(obj: any, keys: Set<string>, values: Set<string>): boolean {
     if (obj === undefined || obj === null) {

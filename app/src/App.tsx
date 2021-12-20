@@ -19,6 +19,8 @@ import { KVSearch } from '@nexucis/kvsearch';
 
 const kvSearch = new KVSearch({
     shouldSort: true,
+    pre: '<strong>',
+    post: '</strong>',
     indexedKeys: [
         'labels',
         'scrapePool',
@@ -41,13 +43,13 @@ function App(): JSX.Element {
     }
 
     return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <TextField sx={{ marginLeft: '25%', marginRight: '25%'}}
-            onChange={handleSearchChange}
-            InputProps={{ startAdornment: <InputAdornment position={'start'}><Search/></InputAdornment> }}
+        <TextField sx={{ marginLeft: '25%', marginRight: '25%' }}
+                   onChange={handleSearchChange}
+                   InputProps={{ startAdornment: <InputAdornment position={'start'}><Search/></InputAdornment> }}
         />
         {
             Object.entries(list).map(([scrapePool, targets], index) => {
-                return <Box key={index} sx={{ marginLeft: '2rem', marginRight: '2rem'}}>
+                return <Box key={index} sx={{ marginLeft: '2rem', marginRight: '2rem' }}>
                     <Typography variant="h6">
                         {scrapePool}
                     </Typography>

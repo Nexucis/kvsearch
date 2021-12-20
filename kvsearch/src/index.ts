@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { walk } from './walk';
-import { match } from '@nexucis/fuzzy';
+import { walk, WalkingPath } from './walk';
+import { match, render } from '@nexucis/fuzzy';
 
 export interface MatchingInterval {
     from: number;
@@ -29,13 +29,14 @@ export interface MatchingInterval {
 }
 
 export interface MatchingResult {
-    path: (string | RegExp)[];
+    path: string[];
     value: string;
     intervals: MatchingInterval[];
 }
 
 export interface KVSearchResult {
     original: Record<string, unknown>;
+    rendered: Record<string, unknown>;
     score: number;
     index: number;
     matched?: MatchingResult[]
@@ -76,11 +77,11 @@ export interface KVSearchConfiguration {
     indexedKeys?: (string | RegExp | (string | RegExp)[])[]
 }
 
-
 // merge is called only when a.original and b.original are equal, and so the result must be merged
 function merge(a: KVSearchResult, b: KVSearchResult): KVSearchResult {
     const result = {
         original: a.original,
+        rendered: a.rendered,
         score: a.score + b.score,
         index: a.index,
     } as KVSearchResult
@@ -180,8 +181,8 @@ export class KVSearch {
             includeMatches: conf?.includeMatches === undefined ? false : conf.includeMatches,
             shouldSort: conf?.shouldSort === undefined ? false : conf.shouldSort,
             escapeHTML: conf?.escapeHTML === undefined ? false : conf.escapeHTML,
-            pre: conf?.pre === undefined ? '' : conf.pre,
-            post: conf?.post === undefined ? '' : conf.post,
+            pre: conf?.pre,
+            post: conf?.post,
             isEqual: conf?.isEqual === undefined ? defaultIsEqual : conf.isEqual,
             indexedKeys: conf?.indexedKeys,
         }
@@ -221,6 +222,7 @@ export class KVSearch {
     filterWithQuery(query: Query | QueryNode, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
         const isEqual = conf?.isEqual !== undefined ? conf.isEqual : this.conf.isEqual;
+        const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const queryNodes: (Query | QueryNode | 'or' | 'and')[] = [query]
         // `results` is a double array because it will contain the result of each branches. Each branches returns an array.
         // For example, you have the following tree :
@@ -263,6 +265,12 @@ export class KVSearch {
             }
         }
         let finalResult = results[0]
+        for (let i = 0; i < finalResult.length; i++) {
+            finalResult[i].rendered = this.render(finalResult[i].original, finalResult[i].matched, conf)
+            if (!includeMatches) {
+                finalResult[i].matched = undefined
+            }
+        }
         if (shouldSort) {
             finalResult = finalResult.sort((a, b) => {
                 return b.score - a.score
@@ -272,16 +280,79 @@ export class KVSearch {
     }
 
     match(query: Query, obj: Record<string, unknown>, conf?: KVSearchConfiguration): KVSearchResult | null {
-        // walking through the object until finding the final key used to perform the query
-        const endPath = walk(query.keyPath, obj)
-        return this.recursiveMatch(endPath, query, conf)
+        const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
+        const matched = this.internalMatch(query, obj, conf);
+        if (matched !== null) {
+            matched.original = obj;
+            matched.rendered = this.render(obj, matched.matched, conf)
+            if (!includeMatches) {
+                matched.matched = undefined
+            }
+        }
+        return matched
+    }
+
+    render(obj: Record<string, unknown>, matchingResults?: MatchingResult[], conf?: KVSearchConfiguration): Record<string, unknown> {
+        const pre = conf?.pre ? conf.pre : this.conf.pre
+        const post = conf?.post ? conf.post : this.conf.post
+        if ((pre === undefined && post === undefined) || matchingResults === undefined) {
+            return obj
+        }
+        // copy the object to get a different reference
+        const rendered = JSON.parse(JSON.stringify(obj))
+        const associatePeer: Record<string, string> = {}
+        for (const matchingResult of matchingResults) {
+            this.renderingWalk(matchingResult, rendered, associatePeer, conf)
+        }
+        return rendered
+    }
+
+    private renderingWalk(matchingResult: MatchingResult, obj: Record<string, unknown>, associatedPeer: Record<string, string>, conf?: KVSearchConfiguration) {
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        let currentObj: any = obj
+        let i = 0
+        const path = matchingResult.path
+        while (i < path.length - 1) {
+            //TODO manage array
+            const tmp = currentObj[path[i]]
+            if (tmp !== undefined) {
+                currentObj = currentObj[path[i]]
+            } else {
+                currentObj = currentObj[associatedPeer[path.slice(0, i).toString()]]
+            }
+
+            i++;
+        }
+        const fuzzyConf = {
+            pre: conf?.pre ? conf.pre : this.conf.pre,
+            post: conf?.post ? conf.post : this.conf.post,
+            escapeHTML: conf?.escapeHTML ? conf.escapeHTML : this.conf.escapeHTML
+        }
+        let lastKey = path[i]
+        if (typeof currentObj[lastKey] === 'object') {
+            currentObj = currentObj[lastKey]
+            // in that case, the value is a key of object.
+            // So we need to render this key, to add it to the object and then remove the previous one
+            const renderedKey = render(matchingResult.value, matchingResult.intervals, fuzzyConf)
+            currentObj[renderedKey] = currentObj[matchingResult.value]
+            // Save the association between the old key and the new one.
+            // It will be used in case we have other matching that are passing with this key.
+            associatedPeer[path.concat(matchingResult.value).toString()] = renderedKey
+            delete (currentObj[matchingResult.value])
+        } else {
+            if (currentObj[lastKey] === undefined) {
+                // It means the key changed (aka rendered) in a previous iteration, so we need to get the new key
+                lastKey = associatedPeer[path.toString()]
+            }
+            currentObj[lastKey] = render(currentObj[lastKey], matchingResult.intervals, fuzzyConf)
+        }
     }
 
     private executeQuery(query: Query, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
         const result = [];
         for (let i = 0; i < list.length; i++) {
             const el = list[i];
-            const matched = this.match(query, el, conf);
+            const matched = this.internalMatch(query, el, conf);
             if (matched !== null) {
                 matched.index = i;
                 matched.original = el;
@@ -291,30 +362,54 @@ export class KVSearch {
         return result;
     }
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    private recursiveMatch(endPath: any, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
-        if (endPath === undefined || endPath === null) {
-            return null;
-        }
+    private internalMatch(query: Query, obj: Record<string, unknown>, conf?: KVSearchConfiguration) {
+        // walking through the object until finding the final key used to perform the query
+        const endPath = walk(query.keyPath, obj)
+        return this.processWalkingPath(endPath, query, conf)
+    }
+
+    private processWalkingPath(walkingPath: WalkingPath | WalkingPath[] | null, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
         let result = null
-        if (typeof endPath === 'string') {
-            result = this.matchSingleString(endPath, query, conf)
-        } else if (Array.isArray(endPath)) {
-            for (const t of endPath) {
-                const tmp = this.recursiveMatch(t, query, conf)
+        if (walkingPath === null) {
+            return null
+        }
+        if (Array.isArray(walkingPath)) {
+            for (const existingPath of walkingPath) {
+                const tmp = this.recursiveMatch(existingPath.value, existingPath.path, query, conf)
                 if (tmp !== null) {
-                    if (result !== null) {
+                    if (result != null) {
                         result = merge(tmp, result)
                     } else {
-                        result = tmp;
+                        result = tmp
                     }
                 }
             }
-        } else if (typeof endPath === 'object') {
-            for (const key of Object.keys(endPath)) {
-                result = this.matchSingleString(key, query, conf)
+        } else {
+            result = this.recursiveMatch(walkingPath.value, walkingPath.path, query, conf)
+        }
+        return result
+    }
+
+    private recursiveMatch(value: Record<string, unknown> | Record<string, unknown>[] | string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
+        let result = null
+        if (typeof value === 'string') {
+            result = this.matchSingleString(value, path, query, conf)
+        } else if (Array.isArray(value)) {
+            for (const r of value) {
+                const tmp = this.recursiveMatch(r, path, query, conf)
+                if (tmp !== null) {
+                    if (result != null) {
+                        result = merge(tmp, result)
+                    } else {
+                        result = tmp
+                    }
+                }
+            }
+        } else {
+            for (const key of Object.keys(value)) {
+                result = this.matchSingleString(key, path, query, conf)
                 if (result !== null) {
-                    // stop to search through the different keys at the first match.
+                    // TODO by configuration decide if we should continue furthermore to grab all result.
                     break
                 }
             }
@@ -322,27 +417,21 @@ export class KVSearch {
         return result
     }
 
-    private matchSingleString(text: string, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
-        const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
+    private matchSingleString(text: string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
         const caseSensitive = conf?.caseSensitive !== undefined ? conf.caseSensitive : this.conf.caseSensitive
         switch (query.match) {
             case 'exact': {
                 if (exactMatch(query.pattern, text, caseSensitive)) {
-                    const result = {
+                    return {
                         // for scoring here, let's use the same value than the one used for the fuzzy search.
                         // It will be coherent when you are mixing query with fuzzy and exact match.
-                        score: Infinity
-                    } as KVSearchResult
-
-                    if (includeMatches) {
-                        result.matched = [{
-                            // TODO put the accurate path
-                            path: query.keyPath,
+                        score: Infinity,
+                        matched: [{
+                            path: path,
                             value: text,
                             intervals: [{ from: 0, to: text.length - 1 }]
                         }]
-                    }
-                    return result
+                    } as KVSearchResult
                 } else {
                     return null
                 }
@@ -350,7 +439,6 @@ export class KVSearch {
             case 'negative': {
                 if (negativeMatch(query.pattern, text, caseSensitive)) {
                     return {
-                        // TODO probably determinate how far pattern and text are different.
                         score: 1,
                     } as KVSearchResult
                 } else {
@@ -359,25 +447,22 @@ export class KVSearch {
             }
             case 'fuzzy': {
                 const fuzzyResult = match(query.pattern, text, {
-                    includeMatches: includeMatches,
+                    includeMatches: true,
                     caseSensitive: caseSensitive
                 })
                 if (fuzzyResult === null) {
                     return null
                 }
-                const result = {
+                return {
                     score: fuzzyResult.score,
-                } as KVSearchResult
-                if (includeMatches) {
-                    result.matched = [
+                    matched: [
                         {
-                            path: query.keyPath,
+                            path: path,
                             value: text,
                             intervals: fuzzyResult.intervals ? fuzzyResult.intervals : [],
                         }
                     ]
-                }
-                return result
+                } as KVSearchResult
             }
         }
     }
