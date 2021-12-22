@@ -62,10 +62,6 @@ function isQuery(q: Query | QueryNode | 'or' | 'and'): q is Query {
     return (q as Query).keyPath !== undefined;
 }
 
-type ObjectIsEqualFn = (a: Record<string, unknown>, b: Record<string, unknown>) => boolean;
-
-const defaultIsEqual: ObjectIsEqualFn = (a: Record<string, unknown>, b: Record<string, unknown>) => JSON.stringify(a) === JSON.stringify(b);
-
 export interface KVSearchConfiguration {
     caseSensitive?: boolean;
     includeMatches?: boolean;
@@ -73,7 +69,6 @@ export interface KVSearchConfiguration {
     escapeHTML?: boolean;
     pre?: string;
     post?: string;
-    isEqual?: ObjectIsEqualFn;
     indexedKeys?: (string | RegExp | (string | RegExp)[])[]
 }
 
@@ -99,43 +94,29 @@ function merge(a: KVSearchResult, b: KVSearchResult): KVSearchResult {
     return result;
 }
 
-// union will concat 'a' with 'b' and removes the duplicated result
+// union will concat 'a' with 'b'.
 // Note: this function is exported only for testing purpose.
-export function union(a: KVSearchResult[], b: KVSearchResult[], isEqual: ObjectIsEqualFn = defaultIsEqual): KVSearchResult[] {
-    const result = [...a]
-    for (let i = 0; i < b.length; i++) {
-        let shouldInsert = true
-        const left = b[i];
-        for (let j = 0; j < a.length; j++) {
-            const right = result[j];
-            if (isEqual(left.original, right.original)) {
-                result[j] = merge(left, right)
-                shouldInsert = false
-                break
-            }
-        }
-        if (shouldInsert) {
-            result.push(left)
+export function union(a: Record<number, KVSearchResult>, b: Record<number, KVSearchResult>): void {
+    // here we don't copy a because it cost (a lot) to do it.
+    const result = a
+    for (const [k, v] of Object.entries(b)) {
+        const index = (k as unknown as number)
+        if (result[index] !== undefined) {
+            result[index] = merge(result[index], v)
+        } else {
+            result[index] = v
         }
     }
-    return result
 }
 
 // intersect will keep only the results that are present in 'a' and 'b'
 // Note: this function is exported only for testing purpose.
-export function intersect(a: KVSearchResult[], b: KVSearchResult[], isEqual: ObjectIsEqualFn = defaultIsEqual): KVSearchResult[] {
-    const result: KVSearchResult[] = []
-    const searchList = [...b]
-    for (let i = 0; i < a.length; i++) {
-        for (let j = 0; j < searchList.length; j++) {
-            const left = a[i];
-            const right = searchList[j];
-            if (!isEqual(left.original, right.original)) {
-                continue
-            }
-            result.push(merge(right, left))
-            searchList.splice(j, 1)
-            break
+export function intersect(a: Record<number, KVSearchResult>, b: Record<number, KVSearchResult>): Record<number, KVSearchResult> {
+    const result: Record<number, KVSearchResult> = {}
+    for (const [k, v] of Object.entries(b)) {
+        const index = (k as unknown as number)
+        if (a[index] !== undefined) {
+            result[index] = merge(a[index], v)
         }
     }
     return result
@@ -183,7 +164,6 @@ export class KVSearch {
             escapeHTML: conf?.escapeHTML === undefined ? false : conf.escapeHTML,
             pre: conf?.pre,
             post: conf?.post,
-            isEqual: conf?.isEqual === undefined ? defaultIsEqual : conf.isEqual,
             indexedKeys: conf?.indexedKeys,
         }
     }
@@ -221,7 +201,6 @@ export class KVSearch {
 
     filterWithQuery(query: Query | QueryNode, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
-        const isEqual = conf?.isEqual !== undefined ? conf.isEqual : this.conf.isEqual;
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const queryNodes: (Query | QueryNode | 'or' | 'and')[] = [query]
         // `results` is a double array because it will contain the result of each branches. Each branches returns an array.
@@ -231,9 +210,10 @@ export class KVSearch {
         //          /    \
         //   Query "left"  Query "right"
         //
-        // So Each query, "Query "left"" and "Query "right"" are returning an array KVSearchResult that are stored in results.
+        // So Each query, "Query "left"" and "Query "right"" are returning a map of KVSearchResult that are stored in results.
         // Once we arrived at the node "OR", we pop the result from both queries and we merged them.
-        const results: KVSearchResult[][] = []
+        // At most results will contain two elements.
+        const results: Record<number, KVSearchResult>[] = []
         while (queryNodes.length > 0) {
             const currentQuery = queryNodes.shift()
             if (!currentQuery) {
@@ -259,12 +239,13 @@ export class KVSearch {
                 break
             }
             if (currentQuery === 'or') {
-                results.push(union(a, b, isEqual))
+                union(a, b)
+                results.push(a)
             } else {
-                results.push(intersect(a, b, isEqual))
+                results.push(intersect(a, b))
             }
         }
-        let finalResult = results[0]
+        let finalResult = Object.values(results[0])
         for (let i = 0; i < finalResult.length; i++) {
             finalResult[i].rendered = this.render(finalResult[i].original, finalResult[i].matched, conf)
             if (!includeMatches) {
@@ -299,6 +280,7 @@ export class KVSearch {
             return obj
         }
         // copy the object to get a different reference
+        // TODO find a more efficient way to deep copy an object
         const rendered = JSON.parse(JSON.stringify(obj))
         const associatePeer: Record<string, string> = {}
         for (const matchingResult of matchingResults) {
@@ -348,15 +330,15 @@ export class KVSearch {
         }
     }
 
-    private executeQuery(query: Query, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
-        const result = [];
+    private executeQuery(query: Query, list: Record<string, unknown>[], conf?: KVSearchConfiguration): Record<number, KVSearchResult> {
+        const result: Record<number, KVSearchResult> = {};
         for (let i = 0; i < list.length; i++) {
             const el = list[i];
             const matched = this.internalMatch(query, el, conf);
             if (matched !== null) {
                 matched.index = i;
                 matched.original = el;
-                result.push(matched)
+                result[i] = matched
             }
         }
         return result;
