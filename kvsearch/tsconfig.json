@@ -5,12 +5,12 @@
     "rootDir": "./src",
     "tsBuildInfoFile": "../.build-cache/kvsearch.tsbuildinfo",
     "module": "esnext",
-    "noUncheckedIndexedAccess": false
   },
   "include": [
     "src"
   ],
   "exclude": [
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/**/*.benchmark.ts"
   ]
 }
