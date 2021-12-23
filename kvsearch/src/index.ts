@@ -203,7 +203,6 @@ export class KVSearch {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const queryNodes: (Query | QueryNode | 'or' | 'and')[] = [query]
-        // `results` is a double array because it will contain the result of each branches. Each branches returns an array.
         // For example, you have the following tree :
         //            OR
         //           /  \
@@ -212,7 +211,6 @@ export class KVSearch {
         //
         // So Each query, "Query "left"" and "Query "right"" are returning a map of KVSearchResult that are stored in results.
         // Once we arrived at the node "OR", we pop the result from both queries and we merged them.
-        // At most results will contain two elements.
         const results: Record<number, KVSearchResult>[] = []
         while (queryNodes.length > 0) {
             const currentQuery = queryNodes.shift()
