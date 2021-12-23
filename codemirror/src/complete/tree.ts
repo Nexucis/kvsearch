@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { walk } from '@nexucis/kvsearch/dist/walk';
+import { walk, WalkingPath } from '@nexucis/kvsearch/dist/walk';
 
 export interface AutocompleteNode {
     // name is usually the last term contained in the path
@@ -105,7 +105,7 @@ function createChild(objects: Record<string, unknown>[], parent: AutocompleteNod
         const currentObj = objects[index]
         if (currentObj !== undefined) {
             const obj = walk(newPath, currentObj);
-            if (addKeys(obj, keys, values)) {
+            if (obj !== null && addKeysByWalkingPath(obj, keys, values)) {
                 indices.push(index)
             }
         }
@@ -126,11 +126,21 @@ function createChild(objects: Record<string, unknown>[], parent: AutocompleteNod
     }
 }
 
+function addKeysByWalkingPath(path: WalkingPath | WalkingPath[], keys: Set<string>, values: Set<string>): boolean {
+    if (Array.isArray(path)) {
+        let hasBeenAdded = false
+        for (const p of path) {
+            hasBeenAdded = hasBeenAdded || addKeys(p.value, keys, values)
+        }
+        return hasBeenAdded
+    } else {
+        return addKeys(path.value, keys, values)
+    }
+}
+
 // addKeys is adding data in the result depending of the type of object.
 // addKeys returns true if it adds something in the result. It returns false otherwise.
-// TODO need to be deeply reviewed and to use the WalkingPath object
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-function addKeys(obj: any, keys: Set<string>, values: Set<string>): boolean {
+function addKeys(obj: string | Record<string, unknown> | Record<string, unknown>[], keys: Set<string>, values: Set<string>): boolean {
     if (obj === undefined || obj === null) {
         return false
     } else if (typeof obj === 'string') {
