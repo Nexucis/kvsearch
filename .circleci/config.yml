@@ -11,6 +11,11 @@ jobs:
       - node/install-packages
       - run: npm run build
       - run: npm test
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - codemirror/dist
+            - kvsearch/dist
   benchmark:
     executor:
       name: node/default
@@ -27,7 +32,18 @@ jobs:
       - checkout
       - node/install-packages
       - run: npm run lint
-
+  publish-kvsearch:
+    executor:
+      name: node/default
+      tag: '16.13.1'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
+      - run: cd kvsearch && npm publish ./ --access public
 workflows:
   version: 2
   test-deploy:
@@ -39,8 +55,14 @@ workflows:
       - benchmark:
           filters:
             tags:
-              only: /.*/
+              ignore: /.*/
       - lint-lib:
           filters:
             tags:
               ignore: /.*/
+      - publish-kvsearch:
+          requires:
+            - build-and-test
+          filters:
+            tags:
+              only: /kvsearch-.*/
