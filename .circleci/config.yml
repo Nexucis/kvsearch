@@ -39,7 +39,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/project
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/kvsearch/.npmrc
