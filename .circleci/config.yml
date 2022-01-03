@@ -42,7 +42,7 @@ jobs:
           at: ~/
       - run:
           name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/kvsearch/.npmrc
       - run: cd kvsearch && npm publish ./ --access public
 workflows:
   version: 2
