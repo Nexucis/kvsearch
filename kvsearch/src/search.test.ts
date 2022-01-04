@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import chai from 'chai';
-import { KVSearch, Query, QueryNode } from './index';
+import { KVSearch, Query, QueryNode } from './search';
 
 describe('match test', () => {
     const testSuite = [

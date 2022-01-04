@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { walk, WalkingPath } from '@nexucis/kvsearch/dist/walk';
+import { walk, WalkingPath } from '@nexucis/kvsearch';
 
 export interface AutocompleteNode {
     // name is usually the last term contained in the path

@@ -1,5 +1,5 @@
 import { add, complete, cycle, suite } from 'benny';
-import { KVSearch } from './index';
+import { KVSearch } from './search';
 
 function generateTargetList(n: number) {
     const list = []
