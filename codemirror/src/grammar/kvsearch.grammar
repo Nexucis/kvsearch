@@ -18,7 +18,7 @@ Query {
 }
 
 QueryPath {
-  Identifier ("." QueryPath)?
+  (Identifier | "/" Regexp "/") ("." QueryPath)?
 }
 
 @skip { whitespace }
@@ -27,6 +27,7 @@ QueryPath {
   whitespace { std.whitespace+ }
   Identifier { (std.asciiLetter | "_" | ":") (std.asciiLetter | std.digit | "_" | ":" )*}
   Pattern { (std.asciiLetter | "_" | ":" | ".") (std.asciiLetter | std.digit | "_" | ":" | "." )*}
+  Regexp { (std.asciiLetter | std.digit | "_" | "-" | ":" | "*" | "?" | "+" | "\\" | "." | "(" | ")" | "[" | "]")+}
 
   // Operator
   Neq { "!=" }

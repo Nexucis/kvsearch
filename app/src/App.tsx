@@ -3,6 +3,7 @@ import {
     Chip,
     InputAdornment,
     Paper,
+    Switch,
     Table,
     TableBody,
     TableCell,
@@ -14,8 +15,12 @@ import {
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import { groupTargets, objectList, Target } from './objectlist';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { KVSearch } from '@nexucis/kvsearch';
+import { KVSearchExtension, translate } from '@nexucis/kvsearch-codemirror';
+import { EditorState } from '@codemirror/state';
+import { EditorView, ViewUpdate } from '@codemirror/view';
+import { basicSetup } from '@codemirror/basic-setup';
 
 const kvSearch = new KVSearch({
     shouldSort: true,
@@ -28,9 +33,53 @@ const kvSearch = new KVSearch({
     ]
 })
 
+interface searchProps {
+    onChange: (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void;
+}
+
+interface expertSearchProps {
+    onChange: (update: ViewUpdate) => void;
+}
+
+function BasicSearch(props: searchProps): JSX.Element {
+    return (
+        <TextField sx={{ marginLeft: '25%', marginRight: '25%' }}
+                   onChange={props.onChange}
+                   InputProps={{ startAdornment: <InputAdornment position={'start'}><Search/></InputAdornment> }}
+        />
+    )
+}
+
+function ExpertSearch(props: expertSearchProps): JSX.Element {
+    const kvSearchExtension = new KVSearchExtension(objectList);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const viewRef = useRef<EditorView | null>(null);
+    useEffect(() => {
+        if (!containerRef.current) {
+            throw new Error('expected CodeMirror container element to exist');
+        }
+        if (viewRef.current === null) {
+            viewRef.current = new EditorView({
+                state: EditorState.create({
+                    extensions: [basicSetup, kvSearchExtension.asExtension(), EditorView.updateListener.of(props.onChange)],
+                    doc: ''
+                }),
+                parent: containerRef.current,
+            })
+        }
+
+    })
+
+    return (
+        <div ref={containerRef}/>
+    )
+}
+
 function App(): JSX.Element {
     const initialPoolList = groupTargets(objectList)
     const [list, setList] = useState<Record<string, Target[]>>(initialPoolList)
+    const [searchMode, setSearchMode] = useState(true);
+
     const handleSearchChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         if (e.target.value !== '') {
             const result = kvSearch.filter(e.target.value.trim(), objectList)
@@ -42,11 +91,31 @@ function App(): JSX.Element {
         }
     }
 
+    const handleExpertSearchChange = (update: ViewUpdate): void => {
+        if (update.docChanged)
+            if (update.state.doc.toString() != '') {
+                const query = translate(update.state)
+                if (query !== null) {
+                    const result = kvSearch.filterWithQuery(query, objectList)
+                    setList(groupTargets(result.map((value) => {
+                        return value.original as unknown as Target
+                    })));
+                }
+            } else {
+                setList(initialPoolList)
+            }
+
+    }
+
+    const handleSearchModeChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setSearchMode(event.target.checked);
+    };
+
     return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <TextField sx={{ marginLeft: '25%', marginRight: '25%' }}
-                   onChange={handleSearchChange}
-                   InputProps={{ startAdornment: <InputAdornment position={'start'}><Search/></InputAdornment> }}
-        />
+        <Switch checked={searchMode} onChange={handleSearchModeChange}/>
+        {searchMode ?
+            <BasicSearch onChange={handleSearchChange}/> : <ExpertSearch onChange={handleExpertSearchChange}/>
+        }
         {
             Object.entries(list).map(([scrapePool, targets], index) => {
                 return <Box key={index} sx={{ marginLeft: '2rem', marginRight: '2rem' }}>

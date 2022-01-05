@@ -73,3 +73,19 @@ KVSearch(
     )
   )
 )
+
+# Query with regexp
+
+labels./.\.+/ =~ demo
+
+==>
+
+KVSearch(
+  Expression (
+    Query (
+      QueryPath(Identifier, QueryPath(Regexp)),
+      EqlRegex,
+      Pattern
+    )
+  )
+)

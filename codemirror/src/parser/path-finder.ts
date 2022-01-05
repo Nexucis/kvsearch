@@ -92,14 +92,16 @@ export function containsChild(node: SyntaxNode, ...child: (number | string)[]): 
 
 
 // TODO logic to find leaf / subNode has been changed comparing to codemirror-promql. We should report the changes
-export function retrieveAllRecursiveNodes(parentNode: SyntaxNode | null, recursiveNode: number, leaf: number): SyntaxNode[] {
+export function retrieveAllRecursiveNodes(parentNode: SyntaxNode | null, recursiveNode: number, ...leafs: number[]): SyntaxNode[] {
   const nodes: SyntaxNode[] = [];
 
   function recursiveRetrieveNode(node: SyntaxNode | null, nodes: SyntaxNode[]) {
     const subNode = node?.getChild(recursiveNode);
-    const le = node?.getChild(leaf);
-    if (le) {
-      nodes.push(le);
+    for(const leaf of leafs) {
+      const le = node?.getChild(leaf);
+      if (le) {
+        nodes.push(le);
+      }
     }
     if (subNode && subNode.type.id === recursiveNode) {
       recursiveRetrieveNode(subNode, nodes);

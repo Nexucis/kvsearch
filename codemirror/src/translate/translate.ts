@@ -24,6 +24,7 @@ import { SyntaxNode } from '@lezer/common';
 import { Query, QueryNode } from '@nexucis/kvsearch';
 import {
     And,
+    EqlRegex,
     EqlSingle,
     Expression,
     Identifier,
@@ -32,31 +33,41 @@ import {
     Pattern,
     Query as LezerQuery,
     QueryNode as LezerQueryNode,
-    QueryPath
+    QueryPath,
+    Regexp as LezerRegexp
 } from '../grammar/parser.terms';
 import { retrieveAllRecursiveNodes } from '../parser/path-finder';
 import { EditorState } from '@codemirror/state';
+import { syntaxTree } from '@codemirror/language';
 
 
-function buildQuery(state: EditorState, query: SyntaxNode): Query {
+function buildQuery(state: EditorState, query: SyntaxNode): Query | null {
     // first let's calculate the queryPath
-    const keyPath: string[] = []
-    const terms = retrieveAllRecursiveNodes(query, QueryPath, Identifier)
+    const keyPath: (string | RegExp)[] = []
+    const terms = retrieveAllRecursiveNodes(query, QueryPath, Identifier, LezerRegexp)
     for (const term of terms) {
-        keyPath.push(state.sliceDoc(term.from, term.to))
+        if (term.type.id === Identifier) {
+            keyPath.push(state.sliceDoc(term.from, term.to))
+        } else {
+            keyPath.push(new RegExp(state.sliceDoc(term.from, term.to)))
+        }
     }
     let match: 'exact' | 'fuzzy' | 'negative';
     if (query.getChild(Neq) !== null) {
         match = 'negative'
     } else if (query.getChild(EqlSingle) !== null) {
         match = 'exact'
-    } else {
+    } else if (query.getChild(EqlRegex) !== null) {
         match = 'fuzzy'
+    } else {
+        return null
     }
     let pattern = ''
     const patternNode = query.getChild(Pattern);
     if (patternNode !== null) {
         pattern = state.sliceDoc(patternNode.from, patternNode.to)
+    } else {
+        return null
     }
     return {
         keyPath: keyPath,
@@ -100,6 +111,7 @@ function translateRec(state: EditorState, node: SyntaxNode | null): QueryNode | 
     return null
 }
 
-export function translate(state: EditorState, root: SyntaxNode): QueryNode | Query | null {
+export function translate(state: EditorState): QueryNode | Query | null {
+    const root = syntaxTree(state).topNode
     return translateRec(state, root)
 }

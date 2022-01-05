@@ -233,6 +233,47 @@ describe('autocomplete kvsearch test', () => {
             }
         },
         {
+            title: 'autocomplete query path with regexp used',
+            expr: '/lab.*/.',
+            pos: 8,
+            expectedResult: {
+                'options': [
+                    {
+                        label: 'env',
+                        type: 'text'
+                    },
+                    {
+                        label: 'instance',
+                        type: 'text'
+                    },
+                    {
+                        label: 'job',
+                        type: 'text'
+                    },
+                    {
+                        label: 'test',
+                        type: 'text'
+                    },
+                ],
+                from: 8,
+                to: 8,
+                span: /^[a-zA-Z0-9_:]+$/
+
+            }
+        },
+        {
+            title: 'autocomplete query path with regexp used',
+            expr: '/lab.*/',
+            pos: 7,
+            expectedResult: {
+                'options': [],
+                from: 7,
+                to: 7,
+                span: /^[a-zA-Z0-9_:]+$/
+
+            }
+        },
+        {
             title: 'autocomplete pattern',
             expr: 'labels.instance != dem',
             pos: 22,
