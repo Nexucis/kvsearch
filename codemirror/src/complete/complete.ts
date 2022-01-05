@@ -35,7 +35,8 @@ import {
     Pattern,
     Query,
     QueryNode,
-    QueryPath
+    QueryPath,
+    Regexp as LezerRegexp
 } from '../grammar/parser.terms';
 import { containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
 
@@ -51,7 +52,7 @@ export enum ContextKind {
 }
 
 interface TreeTerms {
-    terms: string[];
+    terms: (string | RegExp)[];
     depth: number;
 }
 
@@ -79,16 +80,24 @@ function computeStartCompletePosition(node: SyntaxNode, pos: number): number {
     return start;
 }
 
-function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): TreeTerms {
-    const terms = retrieveAllRecursiveNodes(walkBackward(node, Query), QueryPath, Identifier)
-    const decodedTerms: string[] = []
+function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): TreeTerms | null {
+    const terms = retrieveAllRecursiveNodes(walkBackward(node, Query), QueryPath, Identifier, LezerRegexp)
+    const decodedTerms: (string | RegExp)[] = []
     let depth = 0
     let i = 0
     for (const term of terms) {
-        decodedTerms.push(state.sliceDoc(term.from, term.to))
+        if (term.type.id === Identifier) {
+            decodedTerms.push(state.sliceDoc(term.from, term.to))
+        } else {
+            decodedTerms.push(new RegExp(state.sliceDoc(term.from, term.to)))
+        }
         if (node.type.id === Identifier && term.from === node.from && term.to === node.to) {
             depth = i;
-        } else if (node.type.id === QueryPath && term.to === pos - 1) {
+        } else if (node.type.id === QueryPath && (
+            (term.type.id === Identifier && term.to === pos - 1) ||
+            // it's pos -2 when it's a Regexp, because a Regexp is identified between `//` so it required one more char to access to the end of the Regexp expression.
+            (term.type.id === LezerRegexp && term.to === pos - 2)
+        )) {
             // This case is quite particular. We are in this situation:
             // `labels.` where the cursor is after the dot.
             // The current node is a `QueryPath` and the tree looks like this: KVSearch(Expression(Query(QueryPath(Identifier,⚠),⚠))).
@@ -96,6 +105,10 @@ function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): 
             // So an idea is to actually matched the first Identifier that is one position before (so in this case the Identifier matching `labels`).
             // And since we are at the next level in the tree we need to increase the depth to one point.
             depth = i + 1;
+        } else if (node.type.id === QueryPath && term.type.id === LezerRegexp && term.to === pos - 1) {
+            // this is a special case when typically you finished to write your regexp but you didn't start to type the next path.
+            // For example : labels./e.*/ where the cursor is after the second '/'. It shouldn't autocomplete anything.
+            return null
         }
         i++
     }
@@ -147,16 +160,40 @@ function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Con
                 // So we should autocomplete the QueryPattern
                 // eslint-disable-next-line no-case-declarations
                 const treeTerms = calculateQueryPath(state, errorNode, pos);
-                result.push({
-                    kind: ContextKind.Pattern,
-                    treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
-                })
+                if (treeTerms !== null) {
+                    result.push({
+                        kind: ContextKind.Pattern,
+                        treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
+                    })
+                }
                 break
             } else {
                 result.push({ kind: ContextKind.QueryMatcher, treeTerms: { terms: [], depth: 0 } });
             }
     }
     return result;
+}
+
+function analyzeQueryPattern(state: EditorState, node: SyntaxNode, pos: number, result: Context[]) {
+    const treeTerms = calculateQueryPath(state, node, pos);
+    if (treeTerms !== null) {
+        // here we are autocompleting the pattern that should be associated to the query path. So we want the value of the last node in the tree.
+        // That's why we are changing the depth here instead of using the one calculated.
+        result.push({
+            kind: ContextKind.Pattern,
+            treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
+        })
+    }
+}
+
+function analyzeQueryPath(state: EditorState, node: SyntaxNode, pos: number, result: Context[]) {
+    const treeTerms = calculateQueryPath(state, node, pos);
+    if (treeTerms !== null) {
+        result.push({
+            kind: ContextKind.KeyPath,
+            treeTerms: treeTerms
+        })
+    }
 }
 
 export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: number): Context[] {
@@ -167,12 +204,7 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
             result = result.concat(analyzeRootNode(state, node, pos))
             break;
         case Pattern:
-            // eslint-disable-next-line no-case-declarations
-            const treeTerms = calculateQueryPath(state, node, pos);
-            result.push({
-                kind: ContextKind.Pattern,
-                treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
-            })
+            analyzeQueryPattern(state, node, pos, result)
             break
         case Identifier:
         case QueryPath:
@@ -180,7 +212,7 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
             // Like `labels.instance`.
             // Here we have to know what is currently requested to be autocompleted (with the example above: labels or instance).
             // In a later stage it will be used to give the position in the tres and change the list to complete.
-            result.push({ kind: ContextKind.KeyPath, treeTerms: calculateQueryPath(state, node, pos) })
+            analyzeQueryPath(state, node, pos, result)
             break;
     }
     return result;

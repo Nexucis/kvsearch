@@ -25,13 +25,13 @@ import { walk, WalkingPath } from '@nexucis/kvsearch';
 export interface AutocompleteNode {
     // name is usually the last term contained in the path
     // The only exception is for the root where the name is empty
-    name: string
+    name: string | RegExp
     // list is the autocompletion list provided when we need to autocomplete the QueryPath
     keys: string[];
     // values is the autocompletion list provided when we need to autocomplete the QueryPattern
     values: string[];
     // path is full list of keyword that was needed to reach this node.
-    path: string[];
+    path: (string | RegExp) [];
     // children is the list of children that has been calculated in a previous autocompletion iteration.
     // This list can be empty. It doesn't mean necessary it's a leaf, it can also mean we never calculate the children before.
     children: AutocompleteNode[];
@@ -61,7 +61,7 @@ export function newRootNode(objects: Record<string, unknown>[]): AutocompleteNod
     }
 }
 
-export function iterateAndCreateMissingChild(depth: number, keyPath: string[], objects: Record<string, unknown>[], root: AutocompleteNode): AutocompleteNode | null {
+export function iterateAndCreateMissingChild(depth: number, keyPath: (string | RegExp) [], objects: Record<string, unknown>[], root: AutocompleteNode): AutocompleteNode | null {
     let i = 0;
     let node: AutocompleteNode | null = root;
     if (depth > keyPath.length) {
@@ -69,7 +69,7 @@ export function iterateAndCreateMissingChild(depth: number, keyPath: string[], o
     }
     while (i < depth) {
         const childKey = keyPath[i]
-        if (childKey === undefined || node === null || !node.keys.includes(childKey)) {
+        if (node === null || ( typeof childKey === 'string' && !node.keys.includes(childKey))) {
             // in that case, it's impossible that node has a child matching this keyPath.
             return null
         }
@@ -96,7 +96,7 @@ export function iterateAndCreateMissingChild(depth: number, keyPath: string[], o
 // createChild will create a new child according to its parent, the list of objects and the childKey requested.
 // It's possible that there is no child created because the path doesn't match anything in the list of object.
 // In that case, the function returns null.
-function createChild(objects: Record<string, unknown>[], parent: AutocompleteNode, childKey: string): AutocompleteNode | null {
+function createChild(objects: Record<string, unknown>[], parent: AutocompleteNode, childKey: string | RegExp): AutocompleteNode | null {
     const newPath = parent.path.concat(childKey);
     const keys = new Set<string>();
     const values = new Set<string>();
