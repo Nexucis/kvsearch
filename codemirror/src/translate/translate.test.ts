@@ -24,7 +24,6 @@
 import { createEditorState } from '../test/utils.test';
 import chai from 'chai';
 import { translate } from './translate';
-import { syntaxTree } from '@codemirror/language';
 import { Query, QueryNode } from '@nexucis/kvsearch';
 
 describe('translate test', () => {
@@ -87,12 +86,17 @@ describe('translate test', () => {
                     pattern: 'grafana',
                 } as Query,
             } as QueryNode
+        },
+        {
+            title: 'Expression with error should return a null query',
+            expr: 'la',
+            expectedResult: null
         }
     ];
     testCases.forEach((value) => {
         it(value.title, () => {
             const state = createEditorState(value.expr);
-            const result = translate(state, syntaxTree(state).topNode)
+            const result = translate(state)
             chai.expect(value.expectedResult).to.deep.equal(result);
         })
     })
