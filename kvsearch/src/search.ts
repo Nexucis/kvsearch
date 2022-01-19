@@ -67,6 +67,7 @@ export interface KVSearchConfiguration {
     includeMatches?: boolean;
     shouldSort?: boolean;
     escapeHTML?: boolean;
+    findAllMatches?: boolean;
     pre?: string;
     post?: string;
     indexedKeys?: (string | RegExp | (string | RegExp)[])[]
@@ -162,6 +163,7 @@ export class KVSearch {
             includeMatches: conf?.includeMatches === undefined ? false : conf.includeMatches,
             shouldSort: conf?.shouldSort === undefined ? false : conf.shouldSort,
             escapeHTML: conf?.escapeHTML === undefined ? false : conf.escapeHTML,
+            findAllMatches: conf?.findAllMatches == undefined ? false : conf.findAllMatches,
             pre: conf?.pre,
             post: conf?.post,
             indexedKeys: conf?.indexedKeys,
@@ -202,7 +204,11 @@ export class KVSearch {
     filterWithQuery(query: Query | QueryNode, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
-        const queryNodes: (Query | QueryNode | 'or' | 'and')[] = [query]
+        const findAllMatches = conf?.findAllMatches !== undefined ? conf.findAllMatches : this.conf.findAllMatches
+        const queryNodes: ({ current: Query | QueryNode | 'or' | 'and', parent?: 'or' | 'and', depth: number })[] = [{
+            current: query,
+            depth: 0
+        }]
         // For example, you have the following tree :
         //            OR
         //           /  \
@@ -211,21 +217,49 @@ export class KVSearch {
         //
         // So Each query, "Query "left"" and "Query "right"" are returning a map of KVSearchResult that are stored in results.
         // Once we arrived at the node "OR", we pop the result from both queries and we merged them.
-        const results: Record<number, KVSearchResult>[] = []
+        const results: { result: Record<number, KVSearchResult>, depth: number }[] = []
         while (queryNodes.length > 0) {
-            const currentQuery = queryNodes.shift()
-            if (!currentQuery) {
+            const currentNode = queryNodes.shift()
+            if (!currentNode) {
                 break
             }
+            const currentQuery = currentNode.current
             if (isQueryNode(currentQuery)) {
                 // As we are doing a DFS (deep first searching, pre-order), we inject first the left node, then the right.
                 // And as we need to merge the result coming from the left and right node according to the current node operator, we add as well the operator.
-                queryNodes.unshift(currentQuery.left, currentQuery.right, currentQuery.operator)
+                queryNodes.unshift(
+                    {
+                        current: currentQuery.left,
+                        parent: currentQuery.operator,
+                        depth: currentNode.depth + 1
+                    },
+                    {
+                        current: currentQuery.right,
+                        parent: currentQuery.operator,
+                        depth: currentNode.depth + 1
+                    },
+                    {
+                        current: currentQuery.operator,
+                        parent: currentNode.parent,
+                        depth: currentNode.depth,
+                    }
+                )
                 continue
             }
             if (isQuery(currentQuery)) {
                 // time to execute the actual query
-                results.push(this.executeQuery(currentQuery, list, conf))
+                // In case we have a previous result at the same depth as the current query and we don't have to find all matches,
+                // we should use the previous result and reduce the number of object to look at it. It will depend of the parent node is a "or" or a "and".
+                // In case it's a "or", we are interesting to search/match every node not already present in the previous result.
+                // In case it's a "and", we are interesting to search/match every node already present in the previous result.
+                let previousResult: { result: Record<number, KVSearchResult>, parent: 'or' | 'and' } | undefined = undefined
+                if (!findAllMatches && results.length > 1 && results[results.length - 1].depth === currentNode.depth && currentNode.parent !== undefined) {
+                    previousResult = { result: results[results.length - 1].result, parent: currentNode.parent }
+                }
+                results.push({
+                    result: this.executeQuery(currentQuery, list, previousResult, conf),
+                    depth: currentNode.depth
+                })
                 continue
             }
             // At this point the currentQuery is actually the operator coming from a previous QueryNode.
@@ -237,13 +271,13 @@ export class KVSearch {
                 break
             }
             if (currentQuery === 'or') {
-                union(a, b)
-                results.push(a)
+                union(a.result, b.result)
+                results.push({ result: a.result, depth: currentNode.depth })
             } else {
-                results.push(intersect(a, b))
+                results.push({ result: intersect(a.result, b.result), depth: currentNode.depth })
             }
         }
-        let finalResult = Object.values(results[0])
+        let finalResult = Object.values(results[0].result)
         for (let i = 0; i < finalResult.length; i++) {
             finalResult[i].rendered = this.render(finalResult[i].original, finalResult[i].matched, conf)
             if (!includeMatches) {
@@ -328,10 +362,23 @@ export class KVSearch {
         }
     }
 
-    private executeQuery(query: Query, list: Record<string, unknown>[], conf?: KVSearchConfiguration): Record<number, KVSearchResult> {
+    private executeQuery(query: Query, list: Record<string, unknown>[], previousResult: { result: Record<number, KVSearchResult>, parent: 'or' | 'and' } | undefined, conf?: KVSearchConfiguration): Record<number, KVSearchResult> {
         const result: Record<number, KVSearchResult> = {};
         for (let i = 0; i < list.length; i++) {
             const el = list[i];
+            if (previousResult) {
+                if (previousResult.parent === 'or') {
+                    if (previousResult.result[i]) {
+                        // in that case this object already matched and we don't need to check again
+                        continue
+                    }
+                } else {
+                    if (!previousResult.result[i]) {
+                        // In that case this object hasn't been matched by the previous query, so it's impossible with an "and" operator to have this object in the final result".
+                        continue
+                    }
+                }
+            }
             const matched = this.internalMatch(query, el, conf);
             if (matched !== null) {
                 matched.index = i;
