@@ -22,7 +22,7 @@ import { EditorState } from '@codemirror/state';
 import { EditorView, ViewUpdate } from '@codemirror/view';
 import { basicSetup } from '@codemirror/basic-setup';
 
-const kvSearch = new KVSearch({
+const kvSearch = new KVSearch<Target>({
     shouldSort: true,
     pre: '<strong>',
     post: '</strong>',

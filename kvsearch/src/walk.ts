@@ -47,7 +47,7 @@ function walkForArray(path: (string | RegExp)[], objs: Record<string, unknown>[]
     }
 }
 
-export function walk(path: (string | RegExp)[], obj: Record<string, unknown>, index = 0, pathUsed: string[] = []): WalkingPath | WalkingPath[] | null {
+export function walk<T>(path: (string | RegExp)[], obj: T, index = 0, pathUsed: string[] = []): WalkingPath | WalkingPath[] | null {
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     let currentObj: any = obj;
     for (let i = index; i < path.length; i++) {
@@ -67,7 +67,7 @@ export function walk(path: (string | RegExp)[], obj: Record<string, unknown>, in
                 return null
             }
         } else {
-            // matcher is a regexp so we have to test every keys to get all possibilities
+            // matcher is a regexp, so we have to test every keys to get all possibilities
             // Since it's a tree of possibilities, we have to recall walk to retry from the beginning the new key
             let possibleObj: WalkingPath[] = []
             for (const key of Object.keys(currentObj)) {
