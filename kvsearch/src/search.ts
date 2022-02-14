@@ -34,9 +34,9 @@ export interface MatchingResult {
     intervals: MatchingInterval[];
 }
 
-export interface KVSearchResult {
-    original: Record<string, unknown>;
-    rendered: Record<string, unknown>;
+export interface KVSearchResult<T> {
+    original: T;
+    rendered: T;
     score: number;
     index: number;
     matched?: MatchingResult[]
@@ -74,13 +74,13 @@ export interface KVSearchConfiguration {
 }
 
 // merge is called only when a.original and b.original are equal, and so the result must be merged
-function merge(a: KVSearchResult, b: KVSearchResult): KVSearchResult {
+function merge<T>(a: KVSearchResult<T>, b: KVSearchResult<T>): KVSearchResult<T> {
     const result = {
         original: a.original,
         rendered: a.rendered,
         score: a.score + b.score,
         index: a.index,
-    } as KVSearchResult
+    } as KVSearchResult<T>
     let matching: MatchingResult[] | undefined;
     if (a.matched && b.matched) {
         matching = a.matched.concat(b.matched)
@@ -97,7 +97,7 @@ function merge(a: KVSearchResult, b: KVSearchResult): KVSearchResult {
 
 // union will concat 'a' with 'b'.
 // Note: this function is exported only for testing purpose.
-export function union(a: Record<number, KVSearchResult>, b: Record<number, KVSearchResult>): void {
+export function union<T>(a: Record<number, KVSearchResult<T>>, b: Record<number, KVSearchResult<T>>): void {
     // here we don't copy a because it cost (a lot) to do it.
     const result = a
     for (const [k, v] of Object.entries(b)) {
@@ -112,8 +112,8 @@ export function union(a: Record<number, KVSearchResult>, b: Record<number, KVSea
 
 // intersect will keep only the results that are present in 'a' and 'b'
 // Note: this function is exported only for testing purpose.
-export function intersect(a: Record<number, KVSearchResult>, b: Record<number, KVSearchResult>): Record<number, KVSearchResult> {
-    const result: Record<number, KVSearchResult> = {}
+export function intersect<T>(a: Record<number, KVSearchResult<T>>, b: Record<number, KVSearchResult<T>>): Record<number, KVSearchResult<T>> {
+    const result: Record<number, KVSearchResult<T>> = {}
     for (const [k, v] of Object.entries(b)) {
         const index = (k as unknown as number)
         if (a[index] !== undefined) {
@@ -154,7 +154,7 @@ function buildQuery(pattern: string, key: string | RegExp | (string | RegExp)[])
 }
 
 
-export class KVSearch {
+export class KVSearch<T> {
     private readonly conf: KVSearchConfiguration;
 
     constructor(conf?: KVSearchConfiguration) {
@@ -170,7 +170,7 @@ export class KVSearch {
         }
     }
 
-    filter(pattern: string, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
+    filter(pattern: string, list: T[], conf?: KVSearchConfiguration): KVSearchResult<T>[] {
         const indexedKeys = conf?.indexedKeys ? conf.indexedKeys : this.conf.indexedKeys;
         if (indexedKeys === undefined) {
             return []
@@ -201,7 +201,7 @@ export class KVSearch {
         return this.filterWithQuery(firstElement, list, conf)
     }
 
-    filterWithQuery(query: Query | QueryNode, list: Record<string, unknown>[], conf?: KVSearchConfiguration): KVSearchResult[] {
+    filterWithQuery(query: Query | QueryNode, list: T[], conf?: KVSearchConfiguration): KVSearchResult<T>[] {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const findAllMatches = conf?.findAllMatches !== undefined ? conf.findAllMatches : this.conf.findAllMatches
@@ -217,7 +217,7 @@ export class KVSearch {
         //
         // So Each query, "Query "left"" and "Query "right"" are returning a map of KVSearchResult that are stored in results.
         // Once we arrived at the node "OR", we pop the result from both queries and we merged them.
-        const results: { result: Record<number, KVSearchResult>, depth: number }[] = []
+        const results: { result: Record<number, KVSearchResult<T>>, depth: number }[] = []
         while (queryNodes.length > 0) {
             const currentNode = queryNodes.shift()
             if (!currentNode) {
@@ -252,7 +252,7 @@ export class KVSearch {
                 // we should use the previous result and reduce the number of object to look at it. It will depend of the parent node is a "or" or a "and".
                 // In case it's a "or", we are interesting to search/match every node not already present in the previous result.
                 // In case it's a "and", we are interesting to search/match every node already present in the previous result.
-                let previousResult: { result: Record<number, KVSearchResult>, parent: 'or' | 'and' } | undefined = undefined
+                let previousResult: { result: Record<number, KVSearchResult<T>>, parent: 'or' | 'and' } | undefined = undefined
                 if (!findAllMatches && results.length > 1 && results[results.length - 1].depth === currentNode.depth && currentNode.parent !== undefined) {
                     previousResult = { result: results[results.length - 1].result, parent: currentNode.parent }
                 }
@@ -292,7 +292,7 @@ export class KVSearch {
         return finalResult ? finalResult : [];
     }
 
-    match(query: Query, obj: Record<string, unknown>, conf?: KVSearchConfiguration): KVSearchResult | null {
+    match(query: Query, obj: T, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const matched = this.internalMatch(query, obj, conf);
         if (matched !== null) {
@@ -305,7 +305,7 @@ export class KVSearch {
         return matched
     }
 
-    render(obj: Record<string, unknown>, matchingResults?: MatchingResult[], conf?: KVSearchConfiguration): Record<string, unknown> {
+    render(obj: T, matchingResults?: MatchingResult[], conf?: KVSearchConfiguration): T {
         const pre = conf?.pre ? conf.pre : this.conf.pre
         const post = conf?.post ? conf.post : this.conf.post
         if ((pre === undefined && post === undefined) || matchingResults === undefined) {
@@ -321,7 +321,7 @@ export class KVSearch {
         return rendered
     }
 
-    private renderingWalk(matchingResult: MatchingResult, obj: Record<string, unknown>, associatedPeer: Record<string, string>, conf?: KVSearchConfiguration) {
+    private renderingWalk(matchingResult: MatchingResult, obj: T, associatedPeer: Record<string, string>, conf?: KVSearchConfiguration) {
         // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         let currentObj: any = obj
         let i = 0
@@ -362,8 +362,8 @@ export class KVSearch {
         }
     }
 
-    private executeQuery(query: Query, list: Record<string, unknown>[], previousResult: { result: Record<number, KVSearchResult>, parent: 'or' | 'and' } | undefined, conf?: KVSearchConfiguration): Record<number, KVSearchResult> {
-        const result: Record<number, KVSearchResult> = {};
+    private executeQuery(query: Query, list: T[], previousResult: { result: Record<number, KVSearchResult<T>>, parent: 'or' | 'and' } | undefined, conf?: KVSearchConfiguration): Record<number, KVSearchResult<T>> {
+        const result: Record<number, KVSearchResult<T>> = {};
         for (let i = 0; i < list.length; i++) {
             const el = list[i];
             if (previousResult) {
@@ -389,13 +389,13 @@ export class KVSearch {
         return result;
     }
 
-    private internalMatch(query: Query, obj: Record<string, unknown>, conf?: KVSearchConfiguration) {
+    private internalMatch(query: Query, obj: T, conf?: KVSearchConfiguration) {
         // walking through the object until finding the final key used to perform the query
         const endPath = walk(query.keyPath, obj)
         return this.processWalkingPath(endPath, query, conf)
     }
 
-    private processWalkingPath(walkingPath: WalkingPath | WalkingPath[] | null, query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
+    private processWalkingPath(walkingPath: WalkingPath | WalkingPath[] | null, query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         let result = null
         if (walkingPath === null) {
             return null
@@ -417,7 +417,7 @@ export class KVSearch {
         return result
     }
 
-    private recursiveMatch(value: Record<string, unknown> | Record<string, unknown>[] | string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
+    private recursiveMatch(value: Record<string, unknown> | Record<string, unknown>[] | string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         let result = null
         if (typeof value === 'string') {
             result = this.matchSingleString(value, path, query, conf)
@@ -444,7 +444,7 @@ export class KVSearch {
         return result
     }
 
-    private matchSingleString(text: string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult | null {
+    private matchSingleString(text: string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         const caseSensitive = conf?.caseSensitive !== undefined ? conf.caseSensitive : this.conf.caseSensitive
         switch (query.match) {
             case 'exact': {
@@ -458,7 +458,7 @@ export class KVSearch {
                             value: text,
                             intervals: [{ from: 0, to: text.length - 1 }]
                         }]
-                    } as KVSearchResult
+                    } as KVSearchResult<T>
                 } else {
                     return null
                 }
@@ -467,7 +467,7 @@ export class KVSearch {
                 if (negativeMatch(query.pattern, text, caseSensitive)) {
                     return {
                         score: 1,
-                    } as KVSearchResult
+                    } as KVSearchResult<T>
                 } else {
                     return null
                 }
@@ -489,7 +489,7 @@ export class KVSearch {
                             intervals: fuzzyResult.intervals ? fuzzyResult.intervals : [],
                         }
                     ]
-                } as KVSearchResult
+                } as KVSearchResult<T>
             }
         }
     }
