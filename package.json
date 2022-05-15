@@ -6,7 +6,8 @@
   "author": "Augustin Husson <husson.augustin@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "npm run build -w kvsearch && npm run build -w codemirror",
+    "build": "npm run build:grammar -w codemirror && npm run build -w app",
+    "build:cjs": "npm run build:cjs --workspaces --if-present",
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
