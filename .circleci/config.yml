@@ -10,6 +10,7 @@ jobs:
       - checkout
       - node/install-packages
       - run: npm run build
+      - run: npm run build:cjs
       - run: npm test
       - persist_to_workspace:
           root: ~/project
