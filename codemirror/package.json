@@ -1,12 +1,14 @@
 {
-  "name": "@nexucis/kvsearch-codemirror",
+  "name": "@nexucis/codemirror-kvsearch",
   "version": "0.1.0",
   "description": "",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
   "scripts": {
     "clean": "rimraf dist/",
     "build": "npm run build:grammar && tsc",
+    "build:cjs": "tsc --project ./tsconfig.cjs.json",
     "build:grammar": "lezer-generator src/grammar/kvsearch.grammar -o src/grammar/parser",
     "test": "ts-mocha -p ../tsconfig.test.json ./**/*.test.ts",
     "test-coverage": "nyc mocha -r ts-node/register src/**/*.test.ts",

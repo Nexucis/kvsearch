@@ -45,6 +45,18 @@ jobs:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/kvsearch/.npmrc
       - run: cd kvsearch && npm publish ./ --access public
+  publish-codemirror:
+    executor:
+      name: node/default
+      tag: '16.13.1'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/kvsearch/.npmrc
+      - run: cd codemirror && npm publish ./ --access public
 workflows:
   version: 2
   test-deploy:
@@ -67,5 +79,13 @@ workflows:
           filters:
             tags:
               only: /kvsearch-.*/
+            branches:
+              ignore: /.*/
+      - publish-codemirror:
+          requires:
+            - build-and-test
+          filters:
+            tags:
+              only: /codemirror-.*/
             branches:
               ignore: /.*/

@@ -17,7 +17,7 @@ import { Search } from '@mui/icons-material';
 import { groupTargets, objectList, Target } from './objectlist';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { KVSearch } from '@nexucis/kvsearch';
-import { KVSearchExtension, translate } from '@nexucis/kvsearch-codemirror';
+import { KVSearchExtension, translate } from '@nexucis/codemirror-kvsearch';
 import { EditorState } from '@codemirror/state';
 import { EditorView, ViewUpdate } from '@codemirror/view';
 import { basicSetup } from '@codemirror/basic-setup';
