@@ -142,9 +142,7 @@ search.filterWithQuery({
 ```
 
 Note as it can be painful to write the query himself, a support to write it with a string in the codemirror editor is
-coming soon.
-
-For the moment, the codemirror support doesn't handle the regexp.
+available. Check it [here](./codemirror/README.md)
 
 ## Demo
 
