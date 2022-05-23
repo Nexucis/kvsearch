@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { walk, WalkingPath } from '@nexucis/kvsearch';
+import {walk, WalkingPath} from '@nexucis/kvsearch';
 
 export interface AutocompleteNode {
     // name is usually the last term contained in the path
@@ -69,7 +69,7 @@ export function iterateAndCreateMissingChild(depth: number, keyPath: (string | R
     }
     while (i < depth) {
         const childKey = keyPath[i]
-        if (node === null || ( typeof childKey === 'string' && !node.keys.includes(childKey))) {
+        if (node === null || (typeof childKey === 'string' && !node.keys.includes(childKey))) {
             // in that case, it's impossible that node has a child matching this keyPath.
             return null
         }
@@ -138,13 +138,13 @@ function addKeysByWalkingPath(path: WalkingPath | WalkingPath[], keys: Set<strin
     }
 }
 
-// addKeys is adding data in the result depending of the type of object.
+// addKeys is adding data in the result depending on the type of object.
 // addKeys returns true if it adds something in the result. It returns false otherwise.
-function addKeys(obj: string | Record<string, unknown> | Record<string, unknown>[], keys: Set<string>, values: Set<string>): boolean {
+function addKeys(obj: number | string | Record<string, unknown> | Record<string, unknown>[], keys: Set<string>, values: Set<string | number>): boolean {
     if (obj === undefined || obj === null) {
         return false
-    } else if (typeof obj === 'string') {
-        // Here the object is a just a string so it means it's a value that should be used for the filtering equation not for the key.
+    } else if (typeof obj === 'string' || typeof obj === 'number') {
+        // Here the object is a just a string, so it means it's a value that should be used for the filtering equation not for the key.
         // So we shouldn't autocomplete it.
         values.add(obj)
         return false

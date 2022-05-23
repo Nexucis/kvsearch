@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { AutocompleteNode, iterateAndCreateMissingChild, newRootNode } from './tree';
-import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
-import { EditorState } from '@codemirror/state';
-import { SyntaxNode } from '@lezer/common';
-import { syntaxTree } from '@codemirror/language';
+import {AutocompleteNode, iterateAndCreateMissingChild, newRootNode} from './tree';
+import {Completion, CompletionContext, CompletionResult} from '@codemirror/autocomplete';
+import {EditorState} from '@codemirror/state';
+import {SyntaxNode} from '@lezer/common';
+import {syntaxTree} from '@codemirror/language';
 import {
     EqlRegex,
     EqlSingle,
@@ -38,10 +38,10 @@ import {
     QueryPath,
     Regexp as LezerRegexp
 } from '../grammar/parser.terms';
-import { containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward } from '../parser/path-finder';
+import {containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward} from '../parser/path-finder';
 
-export const matcherTerms = [{ label: '!=' }, { label: '=~' }, { label: '=' }];
-export const operatorTerms = [{ label: 'OR' }, { label: 'AND' }]
+export const matcherTerms = [{label: '!='}, {label: '=~'}, {label: '='}, {label: '>'}, {label: '>='}, {label: '<'}, {label: '<='}];
+export const operatorTerms = [{label: 'OR'}, {label: 'AND'}]
 
 // ContextKind is the different possible value determinate by the autocompletion
 export enum ContextKind {
@@ -112,7 +112,7 @@ function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): 
         }
         i++
     }
-    return { terms: decodedTerms, depth: depth }
+    return {terms: decodedTerms, depth: depth}
 }
 
 function getCloserErrorNodeFromPosition(node: SyntaxNode, pos: number): SyntaxNode | null {
@@ -139,7 +139,7 @@ function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Con
     const errorNode = getCloserErrorNodeFromPosition(node, pos);
     if (errorNode === null) {
         // in this case, it means we have a correct expression and so the only thing that can be completed are the query operators
-        result.push({ kind: ContextKind.QueryOperator, treeTerms: { terms: [], depth: 0 } })
+        result.push({kind: ContextKind.QueryOperator, treeTerms: {terms: [], depth: 0}})
         return result;
     }
     const parent = errorNode.parent
@@ -151,7 +151,7 @@ function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Con
         case Expression:
         case KVSearch:
             // we are likely at the beginning of a new expression so we can safely autocomplete the QueryPath.
-            result.push({ kind: ContextKind.KeyPath, treeTerms: { terms: [], depth: 0 } })
+            result.push({kind: ContextKind.KeyPath, treeTerms: {terms: [], depth: 0}})
             break;
         case Query:
             if (containsAtLeastOneChild(parent, Neq, EqlRegex, EqlSingle)) {
@@ -163,12 +163,12 @@ function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Con
                 if (treeTerms !== null) {
                     result.push({
                         kind: ContextKind.Pattern,
-                        treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
+                        treeTerms: {terms: treeTerms.terms, depth: treeTerms.terms.length}
                     })
                 }
                 break
             } else {
-                result.push({ kind: ContextKind.QueryMatcher, treeTerms: { terms: [], depth: 0 } });
+                result.push({kind: ContextKind.QueryMatcher, treeTerms: {terms: [], depth: 0}});
             }
     }
     return result;
@@ -181,7 +181,7 @@ function analyzeQueryPattern(state: EditorState, node: SyntaxNode, pos: number, 
         // That's why we are changing the depth here instead of using the one calculated.
         result.push({
             kind: ContextKind.Pattern,
-            treeTerms: { terms: treeTerms.terms, depth: treeTerms.terms.length }
+            treeTerms: {terms: treeTerms.terms, depth: treeTerms.terms.length}
         })
     }
 }
@@ -230,7 +230,7 @@ export class Complete {
     }
 
     kvSearch(context: CompletionContext): CompletionResult | null {
-        const { state, pos } = context;
+        const {state, pos} = context;
         const tree = syntaxTree(state).resolve(pos, -1);
         const contexts = analyzeCompletion(state, tree, pos)
         let result: Completion[] = []
@@ -259,7 +259,7 @@ export class Complete {
         }
         const node = iterateAndCreateMissingChild(context.treeTerms.depth, context.treeTerms.terms, this.objectList, this.tree)
         if (node !== null) {
-            return result.concat(node.keys.map((value) => ({ label: value, type: 'text' })));
+            return result.concat(node.keys.map((value) => ({label: value, type: 'text'})));
         } else {
             return result
         }
@@ -271,7 +271,7 @@ export class Complete {
         }
         const node = iterateAndCreateMissingChild(context.treeTerms.depth, context.treeTerms.terms, this.objectList, this.tree)
         if (node !== null) {
-            return result.concat(node.values.map((value) => ({ label: value, type: 'text' })));
+            return result.concat(node.values.map((value) => ({label: value, type: 'text'})));
         } else {
             return result
         }

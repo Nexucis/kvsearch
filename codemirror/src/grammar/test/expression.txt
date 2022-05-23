@@ -89,3 +89,11 @@ KVSearch(
     )
   )
 )
+
+# Query with inequality
+
+lastScrapeDuration > 2
+
+==>
+
+KVSearch(Expression(Query(QueryPath(Identifier),Gtr,Pattern)))
