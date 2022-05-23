@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { walk, WalkingPath } from './walk';
-import { match, render } from '@nexucis/fuzzy';
+import {walk, WalkingPath} from './walk';
+import {match, render} from '@nexucis/fuzzy';
 
 export interface MatchingInterval {
     from: number;
@@ -30,7 +30,7 @@ export interface MatchingInterval {
 
 export interface MatchingResult {
     path: string[];
-    value: string;
+    value: string | number;
     intervals: MatchingInterval[];
 }
 
@@ -44,8 +44,8 @@ export interface KVSearchResult<T> {
 
 export interface Query {
     keyPath: (string | RegExp)[];
-    match: 'exact' | 'fuzzy' | 'negative';
-    pattern: string;
+    match: 'exact' | 'fuzzy' | 'negative' | 'greater' | 'greaterEqual' | 'less' | 'lessEqual';
+    pattern: string | number;
 }
 
 export interface QueryNode {
@@ -123,28 +123,42 @@ export function intersect<T>(a: Record<number, KVSearchResult<T>>, b: Record<num
     return result
 }
 
-function exactMatch(pattern: string, text: string, caseSensitive: boolean | undefined): boolean {
-    let localPattern = pattern
-    let localText = text
-    if (!caseSensitive) {
-        localPattern = localPattern.toLowerCase()
-        localText = localText.toLowerCase()
-    }
-    return localPattern === localText
+function exactMatch(pattern: string | number, value: string | number, caseSensitive: boolean | undefined): boolean {
+    return genericMatch(pattern, value, (a, b) => a === b, caseSensitive)
 }
 
-function negativeMatch(pattern: string, text: string, caseSensitive: boolean | undefined): boolean {
+function negativeMatch(pattern: string | number, value: string | number, caseSensitive: boolean | undefined): boolean {
+    return genericMatch(pattern, value, (a, b) => a !== b, caseSensitive)
+}
+
+function greaterMatch(pattern: string | number, value: string | number, caseSensitive: boolean | undefined): boolean {
+    return genericMatch(pattern, value, (a, b) => a > b, caseSensitive)
+}
+
+function greaterOrEqualMatch(pattern: string | number, value: string | number, caseSensitive: boolean | undefined): boolean {
+    return genericMatch(pattern, value, (a, b) => a >= b, caseSensitive)
+}
+
+function lessMatch(pattern: string | number, value: string | number, caseSensitive: boolean | undefined): boolean {
+    return genericMatch(pattern, value, (a, b) => a < b, caseSensitive)
+}
+
+function lessOrEqualMatch(pattern: string | number, value: string | number, caseSensitive: boolean | undefined): boolean {
+    return genericMatch(pattern, value, (a, b) => a <= b, caseSensitive)
+}
+
+function genericMatch(pattern: string | number, value: string | number, operator: (a: string | number, b: string | number) => boolean, caseSensitive: boolean | undefined) {
     let localPattern = pattern
-    let localText = text
-    if (!caseSensitive) {
-        localPattern = localPattern.toLowerCase()
-        localText = localText.toLowerCase()
+    let localValue = value
+    if (!caseSensitive && typeof localPattern === 'string' && typeof localValue == 'string') {
+        localPattern = localPattern.toLocaleLowerCase()
+        localValue = localValue.toLocaleLowerCase()
     }
-    return localPattern !== localText
+    return operator(localValue, localPattern)
 }
 
 function buildQuery(pattern: string, key: string | RegExp | (string | RegExp)[]): Query {
-    const query: Query = { match: 'fuzzy', pattern: pattern, keyPath: [] }
+    const query: Query = {match: 'fuzzy', pattern: pattern, keyPath: []}
     if (Array.isArray(key)) {
         query.keyPath = query.keyPath.concat(key)
     } else {
@@ -191,7 +205,7 @@ export class KVSearch<T> {
             const query = buildQuery(pattern, indexedKeys[i]);
             if (i + 1 < indexedKeysLength) {
                 // here we have to create a new QueryNode
-                const node: QueryNode = { operator: 'or', left: query, right: query }
+                const node: QueryNode = {operator: 'or', left: query, right: query}
                 lastElement.right = node;
                 lastElement = node;
             } else {
@@ -254,7 +268,7 @@ export class KVSearch<T> {
                 // In case it's a "and", we are interesting to search/match every node already present in the previous result.
                 let previousResult: { result: Record<number, KVSearchResult<T>>, parent: 'or' | 'and' } | undefined = undefined
                 if (!findAllMatches && results.length > 1 && results[results.length - 1].depth === currentNode.depth && currentNode.parent !== undefined) {
-                    previousResult = { result: results[results.length - 1].result, parent: currentNode.parent }
+                    previousResult = {result: results[results.length - 1].result, parent: currentNode.parent}
                 }
                 results.push({
                     result: this.executeQuery(currentQuery, list, previousResult, conf),
@@ -272,9 +286,9 @@ export class KVSearch<T> {
             }
             if (currentQuery === 'or') {
                 union(a.result, b.result)
-                results.push({ result: a.result, depth: currentNode.depth })
+                results.push({result: a.result, depth: currentNode.depth})
             } else {
-                results.push({ result: intersect(a.result, b.result), depth: currentNode.depth })
+                results.push({result: intersect(a.result, b.result), depth: currentNode.depth})
             }
         }
         let finalResult = Object.values(results[0].result)
@@ -343,7 +357,7 @@ export class KVSearch<T> {
             escapeHTML: conf?.escapeHTML ? conf.escapeHTML : this.conf.escapeHTML
         }
         let lastKey = path[i]
-        if (typeof currentObj[lastKey] === 'object') {
+        if (typeof currentObj[lastKey] === 'object' && typeof matchingResult.value === 'string') {
             currentObj = currentObj[lastKey]
             // in that case, the value is a key of object.
             // So we need to render this key, to add it to the object and then remove the previous one
@@ -417,10 +431,10 @@ export class KVSearch<T> {
         return result
     }
 
-    private recursiveMatch(value: Record<string, unknown> | Record<string, unknown>[] | string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
+    private recursiveMatch(value: Record<string, unknown> | Record<string, unknown>[] | string | number, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         let result = null
-        if (typeof value === 'string') {
-            result = this.matchSingleString(value, path, query, conf)
+        if (typeof value === 'string' || typeof value === 'number') {
+            result = this.matchSingleStringOrNumber(value, path, query, conf)
         } else if (Array.isArray(value)) {
             for (const r of value) {
                 const tmp = this.recursiveMatch(r, path, query, conf)
@@ -434,7 +448,7 @@ export class KVSearch<T> {
             }
         } else {
             for (const key of Object.keys(value)) {
-                result = this.matchSingleString(key, path, query, conf)
+                result = this.matchSingleStringOrNumber(key, path, query, conf)
                 if (result !== null) {
                     // TODO by configuration decide if we should continue furthermore to grab all result.
                     break
@@ -444,36 +458,42 @@ export class KVSearch<T> {
         return result
     }
 
-    private matchSingleString(text: string, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
+    private matchSingleStringOrNumber(value: string | number, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         const caseSensitive = conf?.caseSensitive !== undefined ? conf.caseSensitive : this.conf.caseSensitive
         switch (query.match) {
             case 'exact': {
-                if (exactMatch(query.pattern, text, caseSensitive)) {
-                    return {
-                        // for scoring here, let's use the same value than the one used for the fuzzy search.
-                        // It will be coherent when you are mixing query with fuzzy and exact match.
-                        score: Infinity,
-                        matched: [{
-                            path: path,
-                            value: text,
-                            intervals: [{ from: 0, to: text.length - 1 }]
-                        }]
-                    } as KVSearchResult<T>
-                } else {
+                if (!exactMatch(query.pattern, value, caseSensitive)) {
                     return null
                 }
+                return {
+                    // for scoring here, let's use the same value than the one used for the fuzzy search.
+                    // It will be coherent when you are mixing query with fuzzy and exact match.
+                    score: Infinity,
+                    matched: [{
+                        path: path,
+                        value: value,
+                        intervals: typeof value === 'string' ? [{from: 0, to: value.length - 1}] : []
+                    }]
+                } as KVSearchResult<T>
             }
             case 'negative': {
-                if (negativeMatch(query.pattern, text, caseSensitive)) {
-                    return {
-                        score: 1,
-                    } as KVSearchResult<T>
-                } else {
+                if (!negativeMatch(query.pattern, value, caseSensitive)) {
                     return null
                 }
+                return {
+                    score: 1,
+                    matched: [{
+                        path: path,
+                        value: value,
+                        intervals: [] as MatchingInterval[]
+                    }]
+                } as KVSearchResult<T>
             }
             case 'fuzzy': {
-                const fuzzyResult = match(query.pattern, text, {
+                if (typeof query.pattern !== 'string' || typeof value !== 'string') {
+                    return null
+                }
+                const fuzzyResult = match(query.pattern, value, {
                     includeMatches: true,
                     caseSensitive: caseSensitive
                 })
@@ -485,12 +505,62 @@ export class KVSearch<T> {
                     matched: [
                         {
                             path: path,
-                            value: text,
+                            value: value,
                             intervals: fuzzyResult.intervals ? fuzzyResult.intervals : [],
                         }
                     ]
                 } as KVSearchResult<T>
+
             }
+            case 'greater':
+                if (!greaterMatch(query.pattern, value, caseSensitive)) {
+                    return null
+                }
+                return {
+                    score: 1,
+                    matched: [{
+                        path: path,
+                        value: value,
+                        intervals: [] as MatchingInterval[]
+                    }]
+                } as KVSearchResult<T>
+            case 'greaterEqual':
+                if (!greaterOrEqualMatch(query.pattern, value, caseSensitive)) {
+                    return null
+                }
+                return {
+                    score: 1,
+                    matched: [{
+                        path: path,
+                        value: value,
+                        intervals: [] as MatchingInterval[]
+                    }]
+                } as KVSearchResult<T>
+
+            case 'less':
+                if (!lessMatch(query.pattern, value, caseSensitive)) {
+                    return null
+                }
+                return {
+                    score: 1,
+                    matched: [{
+                        path: path,
+                        value: value,
+                        intervals: [] as MatchingInterval[]
+                    }]
+                } as KVSearchResult<T>
+            case 'lessEqual':
+                if (!lessOrEqualMatch(query.pattern, value, caseSensitive)) {
+                    return null
+                }
+                return {
+                    score: 1,
+                    matched: [{
+                        path: path,
+                        value: value,
+                        intervals: [] as MatchingInterval[]
+                    }]
+                } as KVSearchResult<T>
         }
     }
 }

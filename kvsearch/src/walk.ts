@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 export interface WalkingPath {
-    value: Record<string, unknown> | Record<string, unknown> [] | string;
+    value: Record<string, unknown> | Record<string, unknown> [] | string | number;
     path: string[];
 }
 

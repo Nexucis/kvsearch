@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import chai from 'chai';
-import { KVSearch, Query, QueryNode } from './search';
+import {KVSearch, Query, QueryNode} from './search';
 
 describe('match test', () => {
     const testSuite = [
@@ -49,8 +49,8 @@ describe('match test', () => {
                 'lastScrapeDuration': 0.005635169,
                 'health': 'up'
             },
-            query: { keyPath: ['labels', 'job'], match: 'fuzzy' as 'exact' | 'fuzzy' | 'negative', pattern: 'alert' },
-            conf: { includeMatches: true },
+            query: {keyPath: ['labels', 'job'], match: 'fuzzy' as 'exact' | 'fuzzy' | 'negative', pattern: 'alert'},
+            conf: {includeMatches: true},
             result: {
                 score: 25,
                 original: {
@@ -99,7 +99,7 @@ describe('match test', () => {
                 },
                 matched: [
                     {
-                        intervals: [{ from: 0, to: 4 }],
+                        intervals: [{from: 0, to: 4}],
                         path: ['labels', 'job'],
                         value: 'alertmanager'
                     }
@@ -130,8 +130,8 @@ describe('match test', () => {
                 'lastScrapeDuration': 0.005635169,
                 'health': 'up'
             },
-            query: { keyPath: ['labels'], match: 'exact' as 'exact' | 'fuzzy' | 'negative', pattern: 'instance' },
-            conf: { includeMatches: true },
+            query: {keyPath: ['labels'], match: 'exact' as 'exact' | 'fuzzy' | 'negative', pattern: 'instance'},
+            conf: {includeMatches: true},
             result: {
                 score: Infinity,
                 original: {
@@ -180,11 +180,90 @@ describe('match test', () => {
                 },
                 matched: [
                     {
-                        intervals: [{ from: 0, to: 7 }],
+                        intervals: [{from: 0, to: 7}],
                         path: ['labels'],
                         value: 'instance'
                     }
                 ]
+            }
+        },
+        {
+            title: 'less match',
+            obj: {
+                'discoveredLabels': {
+                    '__address__': 'demo.do.prometheus.io:9093',
+                    '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                    '__metrics_path__': '/metrics',
+                    '__scheme__': 'http',
+                    'env': 'demo',
+                    'job': 'alertmanager'
+                },
+                'labels': {
+                    'env': 'demo',
+                    'instance': 'demo.do.prometheus.io:9093',
+                    'job': 'alertmanager'
+                },
+                'scrapePool': 'alertmanager',
+                'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                'lastError': '',
+                'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                'lastScrapeDuration': 0.005635169,
+                'health': 'up'
+            },
+            query: {
+                keyPath: ['lastScrapeDuration'],
+                match: 'less' as 'exact' | 'fuzzy' | 'negative' | 'greater' | 'greaterEqual' | 'less' | 'lessEqual',
+                pattern: 2
+            },
+            conf: {},
+            result: {
+                score: 1,
+                original: {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
+                rendered: {
+                    'discoveredLabels': {
+                        '__address__': 'demo.do.prometheus.io:9093',
+                        '__meta_filepath': '/etc/prometheus/file_sd/alertmanager.yml',
+                        '__metrics_path__': '/metrics',
+                        '__scheme__': 'http',
+                        'env': 'demo',
+                        'job': 'alertmanager'
+                    },
+                    'labels': {
+                        'env': 'demo',
+                        'instance': 'demo.do.prometheus.io:9093',
+                        'job': 'alertmanager'
+                    },
+                    'scrapePool': 'alertmanager',
+                    'scrapeUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'globalUrl': 'http://demo.do.prometheus.io:9093/metrics',
+                    'lastError': '',
+                    'lastScrape': '2021-11-29T11:26:19.338578796Z',
+                    'lastScrapeDuration': 0.005635169,
+                    'health': 'up'
+                },
+                matched: undefined
             }
         },
     ]
@@ -418,7 +497,7 @@ describe('filterWithQuery test', () => {
                     pattern: 'demo'
                 }
             } as QueryNode,
-            conf: { includeMatches: true },
+            conf: {includeMatches: true},
             result: [
                 {
                     index: 0,
@@ -468,12 +547,12 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'env',],
                             value: 'demo'
                         },
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['discoveredLabels', '__address__'],
                             value: 'demo.do.prometheus.io:9093'
                         },
@@ -528,12 +607,12 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'env'],
                             value: 'demo'
                         },
                         {
-                            'intervals': [{ from: 0, to: 3 }],
+                            'intervals': [{from: 0, to: 3}],
                             path: ['discoveredLabels', '__address__'],
                             value: 'demo.do.prometheus.io:9100',
                         }
@@ -551,7 +630,7 @@ describe('filterWithQuery test', () => {
                 pattern: 'demo',
                 keyPath: ['labels', /.*/]
             } as Query,
-            conf: { includeMatches: true },
+            conf: {includeMatches: true},
             result: [
                 {
                     index: 0,
@@ -601,12 +680,12 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9093'
                         },
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'env'],
                             value: 'demo'
                         },
@@ -655,7 +734,7 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:3000'
                         }
@@ -710,12 +789,12 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            'intervals': [{ from: 0, to: 3 }],
+                            'intervals': [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9100',
                         },
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'env'],
                             value: 'demo'
                         }
@@ -764,7 +843,7 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            'intervals': [{ from: 0, to: 3 }],
+                            'intervals': [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:9090',
                         },
@@ -815,7 +894,7 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8999'
                         }
@@ -866,7 +945,7 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8998'
                         }
@@ -917,7 +996,7 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8997'
                         }
@@ -968,7 +1047,7 @@ describe('filterWithQuery test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 3 }],
+                            intervals: [{from: 0, to: 3}],
                             path: ['labels', 'instance'],
                             value: 'demo.do.prometheus.io:8996'
                         }
@@ -993,7 +1072,7 @@ describe('filter test', () => {
             title: 'search on labels key',
             list: objectList,
             pattern: 'env',
-            conf: { includeMatches: true },
+            conf: {includeMatches: true},
             result: [
                 {
                     index: 0,
@@ -1043,7 +1122,7 @@ describe('filter test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 2 }],
+                            intervals: [{from: 0, to: 2}],
                             path: ['labels'],
                             value: 'env'
                         },
@@ -1098,7 +1177,7 @@ describe('filter test', () => {
                     },
                     matched: [
                         {
-                            intervals: [{ from: 0, to: 2 }],
+                            intervals: [{from: 0, to: 2}],
                             path: ['labels'],
                             value: 'env'
                         }
