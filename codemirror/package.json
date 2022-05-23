@@ -1,6 +1,6 @@
 {
   "name": "@nexucis/codemirror-kvsearch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -37,7 +37,7 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
-    "@nexucis/kvsearch": "^0.7.0"
+    "@nexucis/kvsearch": "^0.8.0"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^0.19.8",
