@@ -14,7 +14,11 @@ QueryNode {
 Query {
   QueryPath Neq Pattern |
   QueryPath EqlRegex Pattern |
-  QueryPath EqlSingle Pattern
+  QueryPath EqlSingle Pattern |
+  QueryPath Lte Pattern |
+  QueryPath Lss Pattern |
+  QueryPath Gte Pattern |
+  QueryPath Gtr Pattern
 }
 
 QueryPath {
@@ -26,13 +30,17 @@ QueryPath {
 @tokens {
   whitespace { std.whitespace+ }
   Identifier { (std.asciiLetter | "_" | ":") (std.asciiLetter | std.digit | "_" | ":" )*}
-  Pattern { (std.asciiLetter | "_" | ":" | ".") (std.asciiLetter | std.digit | "_" | ":" | "." )*}
+  Pattern { (std.asciiLetter | std.digit | "_" | ":" | ".") (std.asciiLetter | std.digit | "_" | ":" | "." )*}
   Regexp { (std.asciiLetter | std.digit | "_" | "-" | ":" | "*" | "?" | "+" | "\\" | "." | "(" | ")" | "[" | "]")+}
 
   // Operator
   Neq { "!=" }
   EqlRegex { "=~" }
   EqlSingle { "=" }
+  Lte { "<=" }
+  Lss { "<" }
+  Gte { ">=" }
+  Gtr { ">" }
   And { "AND" }
   Or { "OR" }
 }

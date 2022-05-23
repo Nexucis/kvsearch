@@ -20,15 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { SyntaxNode } from '@lezer/common';
-import { Query, QueryNode } from '@nexucis/kvsearch';
+import {SyntaxNode} from '@lezer/common';
+import {Query, QueryNode} from '@nexucis/kvsearch';
 import {
     And,
     EqlRegex,
     EqlSingle,
-    Expression,
+    Expression, Gte, Gtr,
     Identifier,
-    KVSearch,
+    KVSearch, Lss, Lte,
     Neq,
     Pattern,
     Query as LezerQuery,
@@ -36,9 +36,9 @@ import {
     QueryPath,
     Regexp as LezerRegexp
 } from '../grammar/parser.terms';
-import { retrieveAllRecursiveNodes } from '../parser/path-finder';
-import { EditorState } from '@codemirror/state';
-import { syntaxTree } from '@codemirror/language';
+import {retrieveAllRecursiveNodes} from '../parser/path-finder';
+import {EditorState} from '@codemirror/state';
+import {syntaxTree} from '@codemirror/language';
 
 
 function buildQuery(state: EditorState, query: SyntaxNode): Query | null {
@@ -52,13 +52,21 @@ function buildQuery(state: EditorState, query: SyntaxNode): Query | null {
             keyPath.push(new RegExp(state.sliceDoc(term.from, term.to)))
         }
     }
-    let match: 'exact' | 'fuzzy' | 'negative';
+    let match: 'exact' | 'fuzzy' | 'negative' | 'greater' | 'greaterEqual' | 'less' | 'lessEqual';
     if (query.getChild(Neq) !== null) {
         match = 'negative'
     } else if (query.getChild(EqlSingle) !== null) {
         match = 'exact'
     } else if (query.getChild(EqlRegex) !== null) {
         match = 'fuzzy'
+    } else if (query.getChild(Gtr) !== null) {
+        match = 'greater'
+    } else if (query.getChild(Gte) !== null) {
+        match = 'greaterEqual'
+    } else if (query.getChild(Lss) !== null) {
+        match = 'less'
+    } else if (query.getChild(Lte) !== null) {
+        match = 'lessEqual'
     } else {
         return null
     }

@@ -27,7 +27,7 @@
   "author": "Augustin Husson <husson.augustin@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@nexucis/fuzzy": "^0.4.0"
+    "@nexucis/fuzzy": "^0.4.1"
   },
   "devDependencies": {
     "benny": "^3.7.1"
