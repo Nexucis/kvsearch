@@ -20,7 +20,7 @@ import { KVSearch } from '@nexucis/kvsearch';
 import { KVSearchExtension, translate } from '@nexucis/codemirror-kvsearch';
 import { EditorState } from '@codemirror/state';
 import { EditorView, ViewUpdate } from '@codemirror/view';
-import { basicSetup } from '@codemirror/basic-setup';
+import { basicSetup } from 'codemirror';
 
 const kvSearch = new KVSearch<Target>({
     shouldSort: true,

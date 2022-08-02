@@ -38,7 +38,7 @@ import {
     QueryPath,
     Regexp as LezerRegexp
 } from '../grammar/parser.terms';
-import {containsAtLeastOneChild, retrieveAllRecursiveNodes, walkBackward} from '../parser/path-finder';
+import {containsAtLeastOneChild, containsChild, retrieveAllRecursiveNodes, walkBackward} from '../parser/path-finder';
 
 export const matcherTerms = [{label: '!='}, {label: '=~'}, {label: '='}, {label: '>'}, {label: '>='}, {label: '<'}, {label: '<='}];
 export const operatorTerms = [{label: 'OR'}, {label: 'AND'}]
@@ -66,15 +66,13 @@ function arrayToCompletionResult(data: Completion[], from: number, to: number, s
         from: from,
         to: to,
         options: data,
-        span: span ? /^[a-zA-Z0-9_:]+$/ : undefined,
+        validFor: span ? /^[a-zA-Z0-9_:]+$/ : undefined,
     } as CompletionResult;
 }
 
 function computeStartCompletePosition(node: SyntaxNode, pos: number): number {
     let start = node.from;
-    if (node.type.id === QueryPath) {
-        start = pos
-    } else if (node.type.id === KVSearch || node.type.id === Expression || node.type.id === QueryNode) {
+    if (node.type.id === QueryPath || node.type.id === KVSearch || node.type.id === Expression || node.type.id === QueryNode || node.type.id === Query) {
         start = pos
     }
     return start;
@@ -116,7 +114,7 @@ function calculateQueryPath(state: EditorState, node: SyntaxNode, pos: number): 
 }
 
 function getCloserErrorNodeFromPosition(node: SyntaxNode, pos: number): SyntaxNode | null {
-    const cursor = node.cursor;
+    const cursor = node.cursor();
     const candidates = []
     while (cursor.next()) {
         // Note: 0 is the id of the error node.
@@ -150,7 +148,7 @@ function analyzeRootNode(state: EditorState, node: SyntaxNode, pos: number): Con
         case QueryNode:
         case Expression:
         case KVSearch:
-            // we are likely at the beginning of a new expression so we can safely autocomplete the QueryPath.
+            // we are likely at the beginning of a new expression, so we can safely autocomplete the QueryPath.
             result.push({kind: ContextKind.KeyPath, treeTerms: {terms: [], depth: 0}})
             break;
         case Query:
@@ -187,12 +185,17 @@ function analyzeQueryPattern(state: EditorState, node: SyntaxNode, pos: number, 
 }
 
 function analyzeQueryPath(state: EditorState, node: SyntaxNode, pos: number, result: Context[]) {
-    const treeTerms = calculateQueryPath(state, node, pos);
-    if (treeTerms !== null) {
-        result.push({
-            kind: ContextKind.KeyPath,
-            treeTerms: treeTerms
-        })
+    if (node.type.id === QueryPath && !containsChild(node, 0)) {
+        // here we have likely a correct queryPath, so we likely need to autocomplete the matcher terms.
+        result.push({kind: ContextKind.QueryMatcher, treeTerms: {terms: [], depth: 0}});
+    } else {
+        const treeTerms = calculateQueryPath(state, node, pos);
+        if (treeTerms !== null) {
+            result.push({
+                kind: ContextKind.KeyPath,
+                treeTerms: treeTerms
+            })
+        }
     }
 }
 
@@ -201,6 +204,7 @@ export function analyzeCompletion(state: EditorState, node: SyntaxNode, pos: num
     switch (node.type.id) {
         case Expression:
         case KVSearch:
+        case Query:
             result = result.concat(analyzeRootNode(state, node, pos))
             break;
         case Pattern:

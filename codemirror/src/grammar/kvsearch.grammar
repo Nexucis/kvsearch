@@ -44,3 +44,5 @@ QueryPath {
   And { "AND" }
   Or { "OR" }
 }
+
+@external propSource kvSearchHighLight from "./highlight"
