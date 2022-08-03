@@ -20,37 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { LRLanguage } from '@codemirror/language';
-import { parser } from './grammar/parser';
-import { Extension } from '@codemirror/state';
-import { Complete } from './complete/complete';
-import { CompletionContext } from '@codemirror/autocomplete';
+import {styleTags, tags} from "@lezer/highlight";
 
-export const kvSearchLanguage: LRLanguage = LRLanguage.define({
-    parser: parser.configure({
-        top: 'KVSearch',
-    }),
-    languageData: {
-        closeBrackets: { brackets: ['('] },
-    }
+export const kvSearchHighLight = styleTags({
+    'And Or': tags.logicOperator,
+    'Neq EqlRegex EqlSingle': tags.arithmeticOperator,
 })
-
-export class KVSearchExtension {
-    private complete: Complete;
-
-    constructor(objects?: Record<string, unknown>[]) {
-        this.complete = new Complete(objects);
-    }
-
-    asExtension(): Extension {
-        const language = kvSearchLanguage;
-        let extension: Extension = [language];
-        const completion = language.data.of({
-            autocomplete: (context: CompletionContext) => {
-                return this.complete.kvSearch(context);
-            },
-        });
-        extension = extension.concat(completion);
-        return extension;
-    }
-}

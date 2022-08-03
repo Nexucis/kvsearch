@@ -25,7 +25,7 @@ import { SyntaxNode } from '@lezer/common';
 // walkBackward will iterate other the tree from the leaf to the root until it founds the given `exit` node.
 // It returns null if the exit is not found.
 export function walkBackward(node: SyntaxNode, exit: number): SyntaxNode | null {
-  const cursor = node.cursor;
+  const cursor = node.cursor();
   let cursorIsMoving = true;
   while (cursorIsMoving && cursor.type.id !== exit) {
     cursorIsMoving = cursor.parent();
@@ -33,33 +33,8 @@ export function walkBackward(node: SyntaxNode, exit: number): SyntaxNode | null 
   return cursor.type.id === exit ? cursor.node : null;
 }
 
-// walkThrough is going to follow the path passed in parameter.
-// If it succeeds to reach the last id/name of the path, then it will return the corresponding Subtree.
-// Otherwise if it's not possible to reach the last id/name of the path, it will return `null`
-// Note: the way followed during the iteration of the tree to find the given path, is only from the root to the leaf.
-export function walkThrough(node: SyntaxNode, ...path: (number | string)[]): SyntaxNode | null {
-  const cursor = node.cursor;
-  let i = 0;
-  let cursorIsMoving = true;
-  path.unshift(cursor.type.id);
-  while (i < path.length && cursorIsMoving) {
-    if (cursor.type.id === path[i] || cursor.type.name === path[i]) {
-      i++;
-      if (i < path.length) {
-        cursorIsMoving = cursor.next();
-      }
-    } else {
-      cursorIsMoving = cursor.nextSibling();
-    }
-  }
-  if (i >= path.length) {
-    return cursor.node;
-  }
-  return null;
-}
-
 export function containsAtLeastOneChild(node: SyntaxNode, ...child: (number | string)[]): boolean {
-  const cursor = node.cursor;
+  const cursor = node.cursor();
   if (!cursor.next()) {
     // let's try to move directly to the children level and
     // return false immediately if the current node doesn't have any child
@@ -73,7 +48,7 @@ export function containsAtLeastOneChild(node: SyntaxNode, ...child: (number | st
 }
 
 export function containsChild(node: SyntaxNode, ...child: (number | string)[]): boolean {
-  const cursor = node.cursor;
+  const cursor = node.cursor();
   if (!cursor.next()) {
     // let's try to move directly to the children level and
     // return false immediately if the current node doesn't have any child

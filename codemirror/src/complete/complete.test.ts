@@ -33,7 +33,7 @@ describe('autocomplete kvsearch test', () => {
             expr: '',
             pos: 0,
             expectedResult: {
-                'options': [
+                options: [
                     {
                         label: 'discoveredLabels',
                         type: 'text'
@@ -73,7 +73,7 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 0,
                 to: 0,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             }
         },
         {
@@ -81,7 +81,7 @@ describe('autocomplete kvsearch test', () => {
             expr: 'lab',
             pos: 3,
             expectedResult: {
-                'options': [
+                options: [
                     {
                         label: 'discoveredLabels',
                         type: 'text'
@@ -121,7 +121,7 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 0,
                 to: 3,
-                span: /^[a-zA-Z0-9_:]+$/
+                validFor: /^[a-zA-Z0-9_:]+$/
 
             }
         },
@@ -130,7 +130,7 @@ describe('autocomplete kvsearch test', () => {
             expr: 'labels.env != demo OR l',
             pos: 23,
             expectedResult: {
-                'options': [
+                options: [
                     {
                         label: 'discoveredLabels',
                         type: 'text'
@@ -170,7 +170,7 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 22,
                 to: 23,
-                span: /^[a-zA-Z0-9_:]+$/
+                validFor: /^[a-zA-Z0-9_:]+$/
 
             }
         },
@@ -179,7 +179,7 @@ describe('autocomplete kvsearch test', () => {
             expr: 'labels.',
             pos: 7,
             expectedResult: {
-                'options': [
+                options: [
                     {
                         label: 'env',
                         type: 'text'
@@ -199,7 +199,7 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 7,
                 to: 7,
-                span: /^[a-zA-Z0-9_:]+$/
+                validFor: /^[a-zA-Z0-9_:]+$/
 
             }
         },
@@ -208,7 +208,7 @@ describe('autocomplete kvsearch test', () => {
             expr: 'labels.env != demo OR labels.',
             pos: 29,
             expectedResult: {
-                'options': [
+                options: [
                     {
                         label: 'env',
                         type: 'text'
@@ -228,7 +228,7 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 29,
                 to: 29,
-                span: /^[a-zA-Z0-9_:]+$/
+                validFor: /^[a-zA-Z0-9_:]+$/
 
             }
         },
@@ -237,7 +237,7 @@ describe('autocomplete kvsearch test', () => {
             expr: '/lab.*/.',
             pos: 8,
             expectedResult: {
-                'options': [
+                options: [
                     {
                         label: 'env',
                         type: 'text'
@@ -257,19 +257,19 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 8,
                 to: 8,
-                span: /^[a-zA-Z0-9_:]+$/
+                validFor: /^[a-zA-Z0-9_:]+$/
 
             }
         },
         {
-            title: 'autocomplete query path with regexp used',
+            title: 'autocomplete query matcher with regexp used',
             expr: '/lab.*/',
             pos: 7,
             expectedResult: {
-                'options': [],
+                options: matcherTerms,
                 from: 7,
                 to: 7,
-                span: /^[a-zA-Z0-9_:]+$/
+                validFor: /^[a-zA-Z0-9_:]+$/
 
             }
         },
@@ -322,7 +322,7 @@ describe('autocomplete kvsearch test', () => {
                 ],
                 from: 19,
                 to: 22,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             },
         },
         {
@@ -372,10 +372,9 @@ describe('autocomplete kvsearch test', () => {
                         type: 'text'
                     },
                 ],
-
                 from: 19,
                 to: 19,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             },
         },
         {
@@ -428,7 +427,7 @@ describe('autocomplete kvsearch test', () => {
 
                 from: 27,
                 to: 27,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             },
         },
         {
@@ -439,7 +438,7 @@ describe('autocomplete kvsearch test', () => {
                 options: matcherTerms,
                 from: 16,
                 to: 16,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             },
         },
         {
@@ -450,7 +449,7 @@ describe('autocomplete kvsearch test', () => {
                 options: matcherTerms,
                 from: 23,
                 to: 23,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             },
         },
         {
@@ -461,7 +460,7 @@ describe('autocomplete kvsearch test', () => {
                 options: matcherTerms,
                 from: 17,
                 to: 17,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             },
         },
         {
@@ -472,7 +471,7 @@ describe('autocomplete kvsearch test', () => {
                 options: operatorTerms,
                 from: 25,
                 to: 25,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             }
         },
         {
@@ -483,7 +482,7 @@ describe('autocomplete kvsearch test', () => {
                 options: operatorTerms,
                 from: 49,
                 to: 49,
-                span: /^[a-zA-Z0-9_:]+$/,
+                validFor: /^[a-zA-Z0-9_:]+$/,
             }
         }
     ];
