@@ -91,6 +91,11 @@ describe('translate test', () => {
             title: 'Expression with error should return a null query',
             expr: 'la',
             expectedResult: null
+        },
+        {
+            title: 'Complexe expression with error should return a null query',
+            expr: 'foo = bar OR bar =',
+            expectedResult: null
         }
     ];
     testCases.forEach((value) => {

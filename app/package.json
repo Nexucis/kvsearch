@@ -32,7 +32,7 @@
     "@emotion/styled": "^11.6.0",
     "@mui/material": "^5.2.3",
     "@mui/icons-material": "^5.2.4",
-    "@nexucis/codemirror-kvsearch": "^0.3.0",
+    "@nexucis/codemirror-kvsearch": "^0.3.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   }

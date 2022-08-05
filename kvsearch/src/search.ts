@@ -54,11 +54,11 @@ export interface QueryNode {
     right: QueryNode | Query;
 }
 
-function isQueryNode(q: Query | QueryNode | 'or' | 'and'): q is QueryNode {
+export function isQueryNode(q: Query | QueryNode | 'or' | 'and'): q is QueryNode {
     return (q as QueryNode).right !== undefined;
 }
 
-function isQuery(q: Query | QueryNode | 'or' | 'and'): q is Query {
+export function isQuery(q: Query | QueryNode | 'or' | 'and'): q is Query {
     return (q as Query).keyPath !== undefined;
 }
 
