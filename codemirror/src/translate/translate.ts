@@ -110,6 +110,9 @@ function translateRec(state: EditorState, node: SyntaxNode | null): QueryNode | 
             const right = translateRec(state, node.lastChild);
             // eslint-disable-next-line no-case-declarations
             const operator = buildQueryOperator(node)
+            if(left === null || right === null) {
+                return null
+            }
             return {
                 operator: operator,
                 left: left,
@@ -119,6 +122,7 @@ function translateRec(state: EditorState, node: SyntaxNode | null): QueryNode | 
     return null
 }
 
+// translate will return null if the query contains some parsing errors.
 export function translate(state: EditorState): QueryNode | Query | null {
     const root = syntaxTree(state).topNode
     return translateRec(state, root)
