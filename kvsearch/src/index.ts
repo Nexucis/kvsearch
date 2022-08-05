@@ -17,7 +17,7 @@
 
 export { walk } from './walk';
 export type { WalkingPath } from './walk';
-export { KVSearch } from './search';
+export { KVSearch, isQueryNode, isQuery } from './search';
 export type {
     MatchingInterval, MatchingResult, KVSearchResult, Query, QueryNode, KVSearchConfiguration
 } from './search'
