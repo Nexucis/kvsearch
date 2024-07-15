@@ -24,6 +24,7 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { Configuration } from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import ESLintWebpackPlugin from "eslint-webpack-plugin";
 
 export const commonConfig: Configuration = {
     mode: 'development',
@@ -47,9 +48,10 @@ export const commonConfig: Configuration = {
                 configFile: path.resolve(__dirname, './tsconfig.json'),
                 build: true, // Since we use project references...
             },
-            eslint: {
-                files: '../*/src/**/*.{ts,tsx,js,jsx}',
-            },
+        }),
+        new ESLintWebpackPlugin({
+            threads: true,
+            files: '../*/src/**/*.{ts,tsx,js,jsx}',
         }),
     ],
     module: {
