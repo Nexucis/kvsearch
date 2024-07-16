@@ -1185,8 +1185,71 @@ describe('filter test', () => {
                     score: Infinity,
                 }
             ]
-
         },
+        {
+            title: 'search with excluded char',
+            list: objectList,
+            pattern: 'demo prometheus 9100',
+            conf: {includeMatches: true, excludedChars: [' ']},
+            result: [
+                {
+                    index: 4,
+                    original: {
+                        discoveredLabels: {
+                            '__address__': 'demo.do.prometheus.io:9100',
+                            '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'env': 'demo',
+                            'job': 'node'
+                        },
+                        labels: {
+                            'env': 'demo',
+                            'instance': 'demo.do.prometheus.io:9100',
+                            'job': 'node'
+                        },
+                        scrapePool: 'node',
+                        scrapeUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        globalUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        lastError: '',
+                        lastScrape: '2021-11-29T11:26:13.434412959Z',
+                        lastScrapeDuration: 0.121943025,
+                        health: 'up'
+                    },
+                    rendered: {
+                        discoveredLabels: {
+                            '__address__': 'demo.do.prometheus.io:9100',
+                            '__meta_filepath': '/etc/prometheus/file_sd/node.yml',
+                            '__metrics_path__': '/metrics',
+                            '__scheme__': 'http',
+                            'env': 'demo',
+                            'job': 'node'
+                        },
+                        labels: {
+                            'env': 'demo',
+                            'instance': '<strong>demo</strong>.do.<strong>prometheus</strong>.io:<strong>9100</strong>',
+                            'job': 'node'
+                        },
+                        scrapePool: 'node',
+                        scrapeUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        globalUrl: 'http://demo.do.prometheus.io:9100/metrics',
+                        lastError: '',
+                        lastScrape: '2021-11-29T11:26:13.434412959Z',
+                        lastScrapeDuration: 0.121943025,
+                        health: 'up'
+                    },
+                    matched:
+                        [
+                            {
+                                intervals: [{from: 0, to: 3}, {from: 8, to: 17}],
+                                path: ['labels', 'instance'],
+                                value: 'demo.do.prometheus.io:9100'
+                            },
+                        ],
+                    score: 131.69230769230768,
+                },
+            ],
+        }
     ]
     for (const test of testSuite) {
         it(test.title, () => {

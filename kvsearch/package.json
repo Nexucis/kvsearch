@@ -1,6 +1,6 @@
 {
   "name": "@nexucis/kvsearch",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
     "build": "tsc",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
     "benchmark": "ts-node --project ../tsconfig.test.json src/search.benchmark.ts",
-    "test": "ts-mocha -p ../tsconfig.test.json ./**/*.test.ts",
+    "test": "ts-mocha --reporter-option maxDiffSize=0 -p ../tsconfig.test.json ./**/*.test.ts",
     "test-coverage": "nyc mocha -r ts-node/register src/**/*.test.ts",
     "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "lint": "eslint src/ --ext .ts",
@@ -27,7 +27,7 @@
   "author": "Augustin Husson <husson.augustin@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@nexucis/fuzzy": "^0.4.1"
+    "@nexucis/fuzzy": "^0.5.1"
   },
   "devDependencies": {
     "benny": "^3.7.1",

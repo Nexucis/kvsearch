@@ -38,7 +38,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@nexucis/kvsearch": "^0.8.1"
+    "@nexucis/kvsearch": "^0.9.0"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.17.0",

@@ -64,11 +64,25 @@ export function isQuery(q: Query | QueryNode | 'or' | 'and'): q is Query {
 
 export interface KVSearchConfiguration {
     caseSensitive?: boolean;
+    // List of characters that should be ignored in the pattern or in the word used for matching
+    excludedChars?: string[];
+    // Whenever the result should contain the list of intervals.
     includeMatches?: boolean;
+    // If true, results will be sorted based on the score.
     shouldSort?: boolean;
+    // If true, then the strings matched will be automatically rendered using the config pre/post and escapeHTML.
+    // By default, shouldRender is set to true.
+    // In case you want to render it yourself, set it to false, and set `includeMatches` to true.
+    // You will need the intervals to call the method render.
+    shouldRender?: boolean;
+    // escapeHTML will escape any HTML tag and special char after applying the rendering
     escapeHTML?: boolean;
     findAllMatches?: boolean;
+    // The string value that will be used during the rendering process.
+    // It will be placed before each succession of chars that are matching.
     pre?: string;
+    // The string value that will be used during the rendering process.
+    // It will be placed after each succession of chars that are matching.
     post?: string;
     indexedKeys?: (string | RegExp | (string | RegExp)[])[]
 }
@@ -176,6 +190,7 @@ export class KVSearch<T> {
             caseSensitive: conf?.caseSensitive === undefined ? false : conf.caseSensitive,
             includeMatches: conf?.includeMatches === undefined ? false : conf.includeMatches,
             shouldSort: conf?.shouldSort === undefined ? false : conf.shouldSort,
+            shouldRender: conf?.shouldRender === undefined ? true : conf.shouldRender,
             escapeHTML: conf?.escapeHTML === undefined ? false : conf.escapeHTML,
             findAllMatches: conf?.findAllMatches == undefined ? false : conf.findAllMatches,
             pre: conf?.pre,
@@ -217,6 +232,7 @@ export class KVSearch<T> {
 
     filterWithQuery(query: Query | QueryNode, list: T[], conf?: KVSearchConfiguration): KVSearchResult<T>[] {
         const shouldSort = conf?.shouldSort !== undefined ? conf.shouldSort : this.conf.shouldSort
+        const shouldRender = conf?.shouldRender !== undefined ? conf.shouldRender : this.conf.shouldRender
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
         const findAllMatches = conf?.findAllMatches !== undefined ? conf.findAllMatches : this.conf.findAllMatches
         const queryNodes: ({ current: Query | QueryNode | 'or' | 'and', parent?: 'or' | 'and', depth: number })[] = [{
@@ -266,7 +282,10 @@ export class KVSearch<T> {
                 // we should use the previous result and reduce the number of object to look at it. It will depend of the parent node is a "or" or a "and".
                 // In case it's a "or", we are interesting to search/match every node not already present in the previous result.
                 // In case it's a "and", we are interesting to search/match every node already present in the previous result.
-                let previousResult: { result: Record<number, KVSearchResult<T>>, parent: 'or' | 'and' } | undefined = undefined
+                let previousResult: {
+                    result: Record<number, KVSearchResult<T>>,
+                    parent: 'or' | 'and'
+                } | undefined = undefined
                 if (!findAllMatches && results.length > 1 && results[results.length - 1].depth === currentNode.depth && currentNode.parent !== undefined) {
                     previousResult = {result: results[results.length - 1].result, parent: currentNode.parent}
                 }
@@ -293,7 +312,7 @@ export class KVSearch<T> {
         }
         let finalResult = Object.values(results[0].result)
         for (let i = 0; i < finalResult.length; i++) {
-            finalResult[i].rendered = this.render(finalResult[i].original, finalResult[i].matched, conf)
+            finalResult[i].rendered = shouldRender ? this.render(finalResult[i].original, finalResult[i].matched, conf) : finalResult[i].original
             if (!includeMatches) {
                 finalResult[i].matched = undefined
             }
@@ -308,10 +327,11 @@ export class KVSearch<T> {
 
     match(query: Query, obj: T, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         const includeMatches = conf?.includeMatches !== undefined ? conf.includeMatches : this.conf.includeMatches
+        const shouldRender = conf?.shouldRender !== undefined ? conf.shouldRender : this.conf.shouldRender
         const matched = this.internalMatch(query, obj, conf);
         if (matched !== null) {
             matched.original = obj;
-            matched.rendered = this.render(obj, matched.matched, conf)
+            matched.rendered = shouldRender ? this.render(obj, matched.matched, conf) : obj
             if (!includeMatches) {
                 matched.matched = undefined
             }
@@ -376,7 +396,10 @@ export class KVSearch<T> {
         }
     }
 
-    private executeQuery(query: Query, list: T[], previousResult: { result: Record<number, KVSearchResult<T>>, parent: 'or' | 'and' } | undefined, conf?: KVSearchConfiguration): Record<number, KVSearchResult<T>> {
+    private executeQuery(query: Query, list: T[], previousResult: {
+        result: Record<number, KVSearchResult<T>>,
+        parent: 'or' | 'and'
+    } | undefined, conf?: KVSearchConfiguration): Record<number, KVSearchResult<T>> {
         const result: Record<number, KVSearchResult<T>> = {};
         for (let i = 0; i < list.length; i++) {
             const el = list[i];
@@ -460,6 +483,12 @@ export class KVSearch<T> {
 
     private matchSingleStringOrNumber(value: string | number, path: string[], query: Query, conf?: KVSearchConfiguration): KVSearchResult<T> | null {
         const caseSensitive = conf?.caseSensitive !== undefined ? conf.caseSensitive : this.conf.caseSensitive
+        let excludedChars: string[] = []
+        if (conf?.excludedChars !== undefined) {
+            excludedChars = conf.excludedChars
+        } else if (this.conf.excludedChars !== undefined) {
+            excludedChars = this.conf.excludedChars
+        }
         switch (query.match) {
             case 'exact': {
                 if (!exactMatch(query.pattern, value, caseSensitive)) {
@@ -495,7 +524,8 @@ export class KVSearch<T> {
                 }
                 const fuzzyResult = match(query.pattern, value, {
                     includeMatches: true,
-                    caseSensitive: caseSensitive
+                    caseSensitive: caseSensitive,
+                    excludedChars: excludedChars,
                 })
                 if (fuzzyResult === null) {
                     return null
