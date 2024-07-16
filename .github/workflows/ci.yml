@@ -33,6 +33,33 @@ jobs:
       - run: npm run build
       - run: npm run build:cjs
       - run: npm test
+      - name: store dist folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            **/dist
+            !**/node_modules
+
+  release-kvsearch:
+    name: "release-kvsearch"
+    needs:
+      - "build-and-test"
+    if: ${{ github.event.release.tag_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: setup npm environment
+        uses: ./.github/actions/setup
+      - name: Download dist folder
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+      - name: Authenticate with registry
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./kvsearch/.npmrc
+      - run: cd kvsearch && npm publish ./ --access public
+
 
   lint-lib:
     name: "lint-lib"

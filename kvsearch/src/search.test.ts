@@ -1241,7 +1241,7 @@ describe('filter test', () => {
                     matched:
                         [
                             {
-                                intervals: [{from: 0, to: 3}, {from: 8, to: 17}],
+                                intervals: [{from: 0, to: 3}, {from: 8, to: 17}, {from: 22, to: 25}],
                                 path: ['labels', 'instance'],
                                 value: 'demo.do.prometheus.io:9100'
                             },
