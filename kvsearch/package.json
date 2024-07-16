@@ -30,6 +30,7 @@
     "@nexucis/fuzzy": "^0.4.1"
   },
   "devDependencies": {
-    "benny": "^3.7.1"
+    "benny": "^3.7.1",
+    "ts-mocha": "^10.0.0"
   }
 }
