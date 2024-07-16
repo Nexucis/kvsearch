@@ -188,6 +188,7 @@ export class KVSearch<T> {
     constructor(conf?: KVSearchConfiguration) {
         this.conf = {
             caseSensitive: conf?.caseSensitive === undefined ? false : conf.caseSensitive,
+            excludedChars: conf?.excludedChars === undefined ? [] : conf.excludedChars,
             includeMatches: conf?.includeMatches === undefined ? false : conf.includeMatches,
             shouldSort: conf?.shouldSort === undefined ? false : conf.shouldSort,
             shouldRender: conf?.shouldRender === undefined ? true : conf.shouldRender,

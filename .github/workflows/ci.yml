@@ -63,8 +63,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-      - name: Authenticate with registry
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./kvsearch/.npmrc
       - run: cd kvsearch && npm publish ./ --access public
 
 
